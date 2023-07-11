@@ -1,0 +1,27 @@
+{
+	"name": "the-ball",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"start": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"lint": "eslint .",
+		"lint:fix": "eslint --fix && prettier --check \"src/**/*.ts\" --write"
+	},
+	"devDependencies": {
+		"@types/node": "^20.4.1",
+		"@typescript-eslint/eslint-plugin": "^6.0.0",
+		"@typescript-eslint/parser": "^6.0.0",
+		"eslint": "^8.44.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-prettier": "^5.0.0",
+		"prettier": "^3.0.0",
+		"typescript": "^5.1.6",
+		"vite": "^4.4.2"
+	},
+	"dependencies": {
+		"phaser": "^3.60.0"
+	}
+}
