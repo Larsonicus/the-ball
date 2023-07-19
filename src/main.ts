@@ -18,7 +18,6 @@ window.addEventListener("load", () => {
       default: "arcade",
       arcade: {
         gravity: { y: 700 },
-        debug: true,
       },
     },
     scene: [PreloadScene, MainScene],
