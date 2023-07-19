@@ -1,32 +1,29 @@
 import Phaser from "phaser";
 
-import { MainScene } from "./scenes";
-import { resize } from "./helpers";
+import { MainScene, PreloadScene } from "./scenes";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./constants";
 
 window.addEventListener("load", () => {
   const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: "app",
+    /** DON'T TOUCH THIS PROPERTY */
+    pixelArt: true,
     scale: {
-      mode: Phaser.Scale.NONE,
+      mode: Phaser.Scale.ScaleModes.ENVELOP,
       width: DEFAULT_WIDTH,
       height: DEFAULT_HEIGHT,
     },
     physics: {
       default: "arcade",
       arcade: {
-        gravity: { y: 200 },
+        gravity: { y: 700 },
+        debug: true,
       },
     },
-    scene: [MainScene],
+    scene: [PreloadScene, MainScene],
+    backgroundColor: "#00B5E2",
   };
 
-  const game = new Phaser.Game(config);
-
-  window.addEventListener("resize", () => {
-    resize(game);
-  });
-
-  resize(game);
+  new Phaser.Game(config);
 });

@@ -5,3 +5,5 @@ export {
   MAX_WIDTH,
   SCALE_MODE,
 } from "./resolution";
+
+export { PLAYER_TEXTURE_KEY } from "./player";
