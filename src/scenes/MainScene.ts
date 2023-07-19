@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
 import { Player } from "@/components/Player";
+import { isExistCoordinate } from "@/helpers";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -148,7 +149,20 @@ export class MainScene extends Phaser.Scene {
       throw new Error("Keyboard not found");
     }
 
-    this.player = new Player(this, 0, 600);
+    const spawnPoint = map.findObject(
+      "spawn",
+      (spawn) => spawn.name === "spawn",
+    );
+
+    if (
+      !spawnPoint ||
+      !isExistCoordinate(spawnPoint.x) ||
+      !isExistCoordinate(spawnPoint.y)
+    ) {
+      throw new Error("Spawn point not found");
+    }
+
+    this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
     this.physics.add.overlap(this.player, this.coins, (_, coin) => {
       this.player?.collectCoin();
