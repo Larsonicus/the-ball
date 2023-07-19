@@ -104,8 +104,8 @@ export class MainScene extends Phaser.Scene {
         throw new Error("Jumper body not found");
       }
 
-      jumperSprite.body.setSize(jumper.width, jumper.height / 2);
-      jumperSprite.body.setOffset(0, jumper.height / 2);
+      jumperSprite.body.setSize(jumper.width, jumper.height * 0.5);
+      jumperSprite.body.setOffset(0, jumper.height * 0.5);
     });
 
     map.getObjectLayer("spikes")?.objects.forEach((spike) => {
@@ -156,26 +156,39 @@ export class MainScene extends Phaser.Scene {
       coin.destroy();
     });
 
-    this.physics.add.collider(this.player, this.spikes, () => {
+    this.physics.add.collider(this.player, this.spikes, (_, spike) => {
+      if (!(spike instanceof Phaser.Physics.Arcade.Sprite)) {
+        throw new Error("Spike not found");
+      }
+
+      if (
+        !(
+          (this.player?.body?.touching.down && spike.body?.touching.up) ||
+          (this.player?.body?.touching.up && spike.body?.touching.down)
+        )
+      ) {
+        return;
+      }
+
       this.player?.die();
     });
 
     this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
-      this.player?.onJumper();
-
       if (!(jumper instanceof Phaser.Physics.Arcade.Sprite)) {
         throw new Error("Jumper not found");
       }
+
+      if (!(jumper.body?.touching.up && this.player?.body?.touching.down)) {
+        return;
+      }
+
+      this.player?.onJumper();
 
       jumper.setTexture("jumper-active");
 
       this.time.addEvent({
         delay: 300,
         callback: () => {
-          if (!jumper.body) {
-            throw new Error("Jumper body not found");
-          }
-
           jumper.setTexture("jumper");
         },
       });

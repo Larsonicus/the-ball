@@ -18,11 +18,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   public collectCoin(): void {
     this.coins++;
-    console.log(this.coins);
   }
 
   public onJumper(): void {
-    this.setVelocityY(-330);
+    this.setVelocityY(-550);
   }
 
   public die(): void {
@@ -108,10 +107,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       throw new Error("Keys/body not found");
     }
 
-    // if (this.body.bottom >= 360) {
-    //   this.die();
-    // }
-
     if (this.isDead) {
       return;
     }
@@ -130,7 +125,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.anims.play("turn");
     }
 
-    if (this.keys.up.isDown && this.body.blocked.down) {
+    if (
+      this.keys.up.isDown &&
+      this.body.blocked.down &&
+      !this.body.touching.down
+    ) {
       this.setVelocityY(-330);
     }
   }
