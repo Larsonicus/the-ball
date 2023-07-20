@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { PLAYER_TEXTURE_KEY } from "@/constants";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH, PLAYER_TEXTURE_KEY } from "@/constants";
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -7,6 +7,12 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.cameras.main.setBackgroundColor("#000000");
+    this.add
+      .text(20, 20, "Loading game...")
+      .setPosition(DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2)
+      .setOrigin(0.5, 0.5);
+
     this.load.setBaseURL("./src/assets");
 
     this.load.image("tileset", "tiles_packed.png");

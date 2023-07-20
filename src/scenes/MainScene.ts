@@ -1,8 +1,9 @@
 import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
-import { Player } from "@/components/Player";
+import { Player } from "@/components";
 import { isNumber } from "@/helpers";
+import { TILE_SIZE } from "@/constants";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -59,7 +60,8 @@ export class MainScene extends Phaser.Scene {
       throw new Error("Layer not found");
     }
 
-    this.sys.animatedTiles.init(all.tilemap);
+    (this.sys as typeof this.sys & { animatedTiles: AnimatedTiles })
+      .animatedTiles;
 
     this.spikes = this.createGroup();
     this.coins = this.createGroup();
@@ -180,6 +182,25 @@ export class MainScene extends Phaser.Scene {
       }
     });
 
+    const finishPoint = map.findObject(
+      "finishPoint",
+      (finish) => finish.name === "finish",
+    );
+
+    if (!finishPoint || !isNumber(finishPoint.x) || !isNumber(finishPoint.y)) {
+      throw new Error("Finish not found");
+    }
+
+    const finishSize = TILE_SIZE * 2;
+    const finish = this.add.rectangle(
+      finishPoint.x,
+      finishPoint.y,
+      finishSize,
+      finishSize,
+    );
+    finish.setOrigin(0, 1);
+    this.physics.add.existing(finish, true);
+
     all.setCollisionByProperty({ hasCollision: true });
 
     if (!this.input.keyboard) {
@@ -241,6 +262,10 @@ export class MainScene extends Phaser.Scene {
           this.checkPoint?.y ?? spawnPoint.y,
         );
       });
+    });
+
+    this.physics.add.overlap(this.player, finish, () => {
+      console.log("finish");
     });
 
     this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
