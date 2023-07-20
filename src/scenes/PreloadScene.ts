@@ -13,7 +13,7 @@ export class PreloadScene extends Phaser.Scene {
       .setPosition(DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2)
       .setOrigin(0.5, 0.5);
 
-    this.load.setBaseURL("./src/assets");
+    this.load.setBaseURL("assets");
 
     this.load.image("tileset", "tiles_packed.png");
     this.load.tilemapTiledJSON("map", "level1.json");
