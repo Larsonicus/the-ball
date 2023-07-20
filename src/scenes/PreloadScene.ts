@@ -27,8 +27,18 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("jumper", "jumper.png");
     this.load.image("jumper-active", "jumper-active.png");
 
-    this.load.audio("coin", "/sounds/coin.mp3");
+    this.load.image("checkpoint", "checkpoint.png");
+    this.load.image("checkpoint-pressed", "checkpoint-pressed.png");
+
     this.load.audio("background", "/music/background.ogg");
+
+    this.load.audio("coin", "/sounds/coin.mp3");
+
+    this.load.audio("death", "/sounds/death.mp3");
+
+    this.load.audio("checkpoint", "/sounds/checkpoint.mp3");
+
+    this.load.audio("jumper", "/sounds/jumper.mp3");
   }
 
   create() {

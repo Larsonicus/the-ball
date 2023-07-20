@@ -24,16 +24,26 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVelocityY(-550);
   }
 
-  public die(): void {
-    this.isDead = true;
+  public die(callback: () => void): void {
+    if (this.isDead) {
+      return;
+    }
 
-    this.setVelocity(0, 0);
+    this.isDead = true;
 
     this.anims.play("dead", true);
 
+    this.scene.sound.play("death");
+
+    this.setVelocity(0);
+
     this.scene.time.addEvent({
-      delay: 300,
-      callback: () => this.scene.scene.restart(),
+      delay: 500,
+      callback: () => {
+        this.setVelocity(0);
+        callback();
+        this.isDead = false;
+      },
     });
   }
 

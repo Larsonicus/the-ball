@@ -1,2 +1,2 @@
 export { resize } from "./resize";
-export { isExistCoordinate } from "./isExistCoordinate";
+export { isNumber } from "./isNumber";

@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
 import { Player } from "@/components/Player";
-import { isExistCoordinate } from "@/helpers";
+import { isNumber } from "@/helpers";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -13,8 +13,18 @@ export class MainScene extends Phaser.Scene {
 
   jumpers: Phaser.Physics.Arcade.Group | null = null;
 
+  checkPoints: Phaser.Physics.Arcade.Group | null = null;
+  checkPoint: { x: number; y: number } | null = null;
+
   constructor() {
     super({ key: "main" });
+  }
+
+  private createGroup(): Phaser.Physics.Arcade.Group {
+    return this.physics.add.group({
+      allowGravity: false,
+      immovable: true,
+    });
   }
 
   preload() {
@@ -34,7 +44,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   create() {
-    this.sound.play("background", { loop: true });
+    this.sound.play("background", { loop: true, volume: 0.1 });
 
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("tiles_packed", "tileset");
@@ -51,18 +61,18 @@ export class MainScene extends Phaser.Scene {
 
     this.sys.animatedTiles.init(all.tilemap);
 
-    this.spikes = this.physics.add.group({
-      allowGravity: false,
-      immovable: true,
-    });
-
-    this.coins = this.physics.add.group({
-      allowGravity: false,
-      immovable: true,
-    });
+    this.spikes = this.createGroup();
+    this.coins = this.createGroup();
+    this.jumpers = this.createGroup();
+    this.checkPoints = this.createGroup();
 
     map.getObjectLayer("coins")?.objects.forEach((coin) => {
-      if (!coin.x || !coin.y || !coin.height || !coin.width) {
+      if (
+        !isNumber(coin.x) ||
+        !isNumber(coin.y) ||
+        !isNumber(coin.height) ||
+        !isNumber(coin.width)
+      ) {
         throw new Error("Coin physics not found");
       }
 
@@ -83,13 +93,35 @@ export class MainScene extends Phaser.Scene {
       coinSprite.anims.play("coin-spin", true);
     });
 
-    this.jumpers = this.physics.add.group({
-      allowGravity: false,
-      immovable: true,
+    map.getObjectLayer("checkPoints")?.objects.forEach((checkPoint) => {
+      if (
+        !isNumber(checkPoint.x) ||
+        !isNumber(checkPoint.y) ||
+        !isNumber(checkPoint.height) ||
+        !isNumber(checkPoint.width)
+      ) {
+        throw new Error("CheckPoint physics not found");
+      }
+
+      const checkPointSprite = this.checkPoints
+        ?.create(checkPoint.x, checkPoint.y, "checkpoint")
+        .setOrigin(0, 1) as Phaser.Physics.Arcade.Sprite;
+
+      if (!checkPointSprite.body) {
+        throw new Error("CheckPoint body not found");
+      }
+
+      checkPointSprite.body.setSize(checkPoint.width, checkPoint.height * 0.5);
+      checkPointSprite.body.setOffset(0, checkPoint.height * 0.5);
     });
 
     map.getObjectLayer("jumpers")?.objects.forEach((jumper) => {
-      if (!jumper.x || !jumper.y || !jumper.height || !jumper.width) {
+      if (
+        !isNumber(jumper.x) ||
+        !isNumber(jumper.y) ||
+        !isNumber(jumper.height) ||
+        !isNumber(jumper.width)
+      ) {
         throw new Error("Jumper physics not found");
       }
 
@@ -110,7 +142,12 @@ export class MainScene extends Phaser.Scene {
     });
 
     map.getObjectLayer("spikes")?.objects.forEach((spike) => {
-      if (!spike.y || !spike.height || !spike.width || !spike.x) {
+      if (
+        !isNumber(spike.y) ||
+        !isNumber(spike.height) ||
+        !isNumber(spike.width) ||
+        !isNumber(spike.x)
+      ) {
         throw new Error("Spike physics not found");
       }
 
@@ -139,7 +176,7 @@ export class MainScene extends Phaser.Scene {
         .setOffset(0, spike.height * 0.5);
 
       if (spike.rotation === 180) {
-        spikeSprite.body.setOffset(-spike.height, -spike.height);
+        spikeSprite.body.setOffset(-spike.width, -spike.height);
       }
     });
 
@@ -154,11 +191,7 @@ export class MainScene extends Phaser.Scene {
       (spawn) => spawn.name === "spawn",
     );
 
-    if (
-      !spawnPoint ||
-      !isExistCoordinate(spawnPoint.x) ||
-      !isExistCoordinate(spawnPoint.y)
-    ) {
+    if (!spawnPoint || !isNumber(spawnPoint.x) || !isNumber(spawnPoint.y)) {
       throw new Error("Spawn point not found");
     }
 
@@ -166,8 +199,26 @@ export class MainScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.coins, (_, coin) => {
       this.player?.collectCoin();
-      this.sound.play("coin");
+      this.sound.play("coin", { volume: 0.2 });
       coin.destroy();
+    });
+
+    this.physics.add.overlap(this.player, this.checkPoints, (_, checkPoint) => {
+      if (!(checkPoint instanceof Phaser.Physics.Arcade.Sprite)) {
+        throw new Error("CheckPoint not found");
+      }
+
+      if (checkPoint.getData("isPressed")) {
+        return;
+      }
+
+      checkPoint.setTexture("checkpoint-pressed");
+
+      this.sound.play("checkpoint", { volume: 0.2 });
+
+      checkPoint.setData("isPressed", true);
+
+      this.checkPoint = { x: checkPoint.x, y: checkPoint.y };
     });
 
     this.physics.add.collider(this.player, this.spikes, (_, spike) => {
@@ -184,7 +235,12 @@ export class MainScene extends Phaser.Scene {
         return;
       }
 
-      this.player?.die();
+      this.player?.die(() => {
+        this.player?.setPosition(
+          this.checkPoint?.x ?? spawnPoint.x,
+          this.checkPoint?.y ?? spawnPoint.y,
+        );
+      });
     });
 
     this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
@@ -199,6 +255,8 @@ export class MainScene extends Phaser.Scene {
       this.player?.onJumper();
 
       jumper.setTexture("jumper-active");
+
+      this.sound.play("jumper", { volume: 0.2 });
 
       this.time.addEvent({
         delay: 300,
