@@ -108,7 +108,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setScale(0.1);
 
-    // this.setBounce(0.2);
     this.setCollideWorldBounds(true);
   }
 
@@ -141,6 +140,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       !this.body.touching.down
     ) {
       this.setVelocityY(-330);
+
+      this.scene.sound.play("jump");
     }
   }
 }
