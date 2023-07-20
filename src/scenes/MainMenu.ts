@@ -4,7 +4,6 @@ import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "@/constants";
 
 export class MainMenu extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Image[] = [];
-  private selectedButtonIndex = 0;
 
   constructor() {
     super({ key: "main-menu" });
