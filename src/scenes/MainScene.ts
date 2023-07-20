@@ -221,8 +221,22 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
+    this.add
+      .image(5, 6, "coin")
+      .setOrigin(0, 0.5)
+      .setDisplayOrigin(0, 0)
+      .setScrollFactor(0);
+
+    const scoreText = this.add
+      .bitmapText(25, 10, "pixelFont", "Coins: 0")
+      .setOrigin(0.5)
+      .setDisplayOrigin(0, 0)
+      .setScrollFactor(0);
+
     this.physics.add.overlap(this.player, this.coins, (_, coin) => {
       this.player?.collectCoin();
+      scoreText.setText(`Coins: ${this.player?.coins}`);
+
       this.sound.play("coin", { volume: 0.2 });
       coin.destroy();
     });
