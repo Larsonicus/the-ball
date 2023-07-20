@@ -35,7 +35,7 @@ export class MainMenu extends Phaser.Scene {
         DEFAULT_WIDTH * 0.5,
         40,
         "pixelFont",
-        "Huge Balls\nRunner",
+        "Huge Ball\nRunner",
         24,
         1,
       )
