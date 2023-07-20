@@ -42,8 +42,10 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("grey-panel", "/ui/grey-panel.png");
     this.load.image("orange-button", "/ui/orange-button.png");
     this.load.image("orange-button-pressed", "/ui/orange-button-pressed.png");
-
     this.load.image("background-ui", "/ui/background.jpg");
+    this.load.image("sounds", "/ui/sounds.png");
+    this.load.image("sounds-off", "/ui/sounds-off.png");
+    this.load.image("close", "/ui/close.png");
 
     this.load.audio("background", "/music/background.ogg");
 

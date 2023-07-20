@@ -22,7 +22,7 @@ export class MainMenu extends Phaser.Scene {
       .setDisplaySize(buttonStyle.width, buttonStyle.height)
       .setDepth(1);
 
-    this.add
+    const playText = this.add
       .text(play.x, play.y, "Play", {
         fontSize: "20px",
       })
@@ -43,7 +43,10 @@ export class MainMenu extends Phaser.Scene {
       .setDisplaySize(buttonStyle.width, buttonStyle.height)
       .setDepth(1);
 
-    this.add.text(options.x, options.y, "Options").setOrigin(0.5).setDepth(2);
+    const optionsText = this.add
+      .text(options.x, options.y, "Options")
+      .setOrigin(0.5)
+      .setDepth(2);
 
     this.add
       .image(DEFAULT_WIDTH * 0.5, 40, "panel")
@@ -84,6 +87,35 @@ export class MainMenu extends Phaser.Scene {
       });
     });
 
+    this.buttons.push(play);
+    this.buttons.push(options);
+
+    const panel = this.add
+      .image(play.x, play.y + buttonStyle.height * 0.5 + 4, "grey-panel")
+      .setDisplaySize(
+        this.buttons.length * buttonStyle.width,
+        this.buttons.length * buttonStyle.height + 15 + 40,
+      );
+
+    const sounds = this.add
+      .image(panel.x, panel.y, "sounds")
+      .setOrigin(0.5)
+      .setDisplaySize(36, 36)
+      .setDepth(2)
+      .setVisible(false);
+
+    const closeOptions = this.add
+      .image(
+        panel.x + panel.displayWidth * 0.5 - 15,
+        panel.y - panel.displayHeight * 0.5 + 15,
+        "close",
+      )
+      .setOrigin(0.5)
+      .setDisplaySize(10, 10)
+      .setTint(0xaa0000)
+      .setDepth(2)
+      .setVisible(false);
+
     options.setInteractive();
     options.on("pointerover", () => {
       options.setTint(0x7878ff);
@@ -99,17 +131,51 @@ export class MainMenu extends Phaser.Scene {
     });
 
     options.on("pointerup", () => {
-      console.log("open options");
+      this.changeElementsVisibility(
+        [closeOptions, sounds],
+        [play, playText, options, optionsText],
+      );
     });
 
-    this.buttons.push(play);
-    this.buttons.push(options);
+    sounds.on("pointerover", () => {
+      sounds.setTint(0xdd118f);
+    });
 
-    this.add
-      .image(play.x, play.y + buttonStyle.height * 0.5 + 4, "grey-panel")
-      .setDisplaySize(
-        this.buttons.length * buttonStyle.width,
-        this.buttons.length * buttonStyle.height + 15 + 40,
+    sounds.on("pointerout", () => {
+      sounds.clearTint();
+    });
+
+    sounds.on("pointerup", () => {
+      sounds.setTexture(this.sound.mute ? "sounds" : "sounds-off");
+      this.sound.setMute(!this.sound.mute);
+    });
+
+    closeOptions.on("pointerover", () => {
+      closeOptions.setTint(0xff0000);
+    });
+
+    closeOptions.on("pointerout", () => {
+      closeOptions.setTint(0xaa0000);
+    });
+
+    closeOptions.on("pointerup", () => {
+      this.changeElementsVisibility(
+        [play, playText, options, optionsText],
+        [closeOptions, sounds],
       );
+    });
+  }
+
+  private changeElementsVisibility(
+    visibleElements: Array<Phaser.GameObjects.Image | Phaser.GameObjects.Text>,
+    hiddenElements: Array<Phaser.GameObjects.Image | Phaser.GameObjects.Text>,
+  ) {
+    for (const element of visibleElements) {
+      element.setVisible(true);
+    }
+
+    for (const element of hiddenElements) {
+      element.setVisible(false);
+    }
   }
 }
