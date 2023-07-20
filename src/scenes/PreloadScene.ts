@@ -47,6 +47,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("sounds-off", "/ui/sounds-off.png");
     this.load.image("close", "/ui/close.png");
 
+    this.load.audio("menu", "/music/menu.ogg");
     this.load.audio("background", "/music/background.ogg");
 
     this.load.audio("coin", "/sounds/coin.mp3");

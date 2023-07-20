@@ -10,6 +10,10 @@ export class MainMenu extends Phaser.Scene {
   }
 
   create() {
+    this.cameras.main.fadeIn();
+
+    this.sound.play("menu", { loop: true, volume: 0.1, delay: 0.5 });
+
     const buttonStyle = {
       width: 75,
       height: 40,
@@ -80,6 +84,7 @@ export class MainMenu extends Phaser.Scene {
 
     play.on("pointerup", () => {
       this.cameras.main.fadeOut(750);
+      this.sound.stopAll();
 
       this.time.delayedCall(1000, () => {
         this.scene.start("main");
@@ -101,7 +106,8 @@ export class MainMenu extends Phaser.Scene {
       .setOrigin(0.5)
       .setDisplaySize(36, 36)
       .setDepth(2)
-      .setVisible(false);
+      .setVisible(false)
+      .setInteractive();
 
     const closeOptions = this.add
       .image(
@@ -113,7 +119,8 @@ export class MainMenu extends Phaser.Scene {
       .setDisplaySize(10, 10)
       .setTint(0xaa0000)
       .setDepth(2)
-      .setVisible(false);
+      .setVisible(false)
+      .setInteractive();
 
     options.setInteractive();
     options.on("pointerover", () => {
