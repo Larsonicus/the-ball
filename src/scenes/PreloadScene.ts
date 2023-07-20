@@ -36,6 +36,15 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image("checkpoint", "checkpoint.png");
     this.load.image("checkpoint-pressed", "checkpoint-pressed.png");
 
+    this.load.image("button", "/ui/button.png");
+    this.load.image("button-pressed", "/ui/button-pressed.png");
+    this.load.image("panel", "/ui/panel.png");
+    this.load.image("grey-panel", "/ui/grey-panel.png");
+    this.load.image("orange-button", "/ui/orange-button.png");
+    this.load.image("orange-button-pressed", "/ui/orange-button-pressed.png");
+
+    this.load.image("background-ui", "/ui/background.jpg");
+
     this.load.audio("background", "/music/background.ogg");
 
     this.load.audio("coin", "/sounds/coin.mp3");
@@ -50,6 +59,6 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start("main");
+    this.scene.start("main-menu");
   }
 }

@@ -60,8 +60,9 @@ export class MainScene extends Phaser.Scene {
       throw new Error("Layer not found");
     }
 
-    (this.sys as typeof this.sys & { animatedTiles: AnimatedTiles })
-      .animatedTiles;
+    (
+      this.sys as typeof this.sys & { animatedTiles: AnimatedTiles }
+    ).animatedTiles.init(map);
 
     this.spikes = this.createGroup();
     this.coins = this.createGroup();

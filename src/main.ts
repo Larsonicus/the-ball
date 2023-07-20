@@ -2,6 +2,7 @@ import Phaser from "phaser";
 
 import { MainScene, PreloadScene } from "./scenes";
 import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "./constants";
+import { MainMenu } from "./scenes/MainMenu";
 
 window.addEventListener("load", () => {
   const config: Phaser.Types.Core.GameConfig = {
@@ -20,7 +21,7 @@ window.addEventListener("load", () => {
         gravity: { y: 700 },
       },
     },
-    scene: [PreloadScene, MainScene],
+    scene: [PreloadScene, MainMenu, MainScene],
     backgroundColor: "#00B5E2",
   };
 
