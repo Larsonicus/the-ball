@@ -59,6 +59,12 @@ export class PreloadScene extends Phaser.Scene {
     this.load.audio("jumper", "/sounds/jumper.mp3");
 
     this.load.audio("jump", "/sounds/jump.wav");
+
+    this.load.bitmapFont(
+      "pixelFont",
+      "/ui/fonts/font.png",
+      "/ui/fonts/font.xml",
+    );
   }
 
   create() {

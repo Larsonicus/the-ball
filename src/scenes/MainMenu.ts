@@ -26,18 +26,19 @@ export class MainMenu extends Phaser.Scene {
       .setDepth(1);
 
     const playText = this.add
-      .text(play.x, play.y, "Play", {
-        fontSize: "20px",
-      })
+      .bitmapText(play.x, play.y, "pixelFont", "Play", 20)
       .setOrigin(0.5)
       .setDepth(2);
 
     const titleText = this.add
-      .text(DEFAULT_WIDTH * 0.5, 40, "Huge Balls\nRunner", {
-        color: "#ffffff",
-        fontSize: "24px",
-        align: "center",
-      })
+      .bitmapText(
+        DEFAULT_WIDTH * 0.5,
+        40,
+        "pixelFont",
+        "Huge Balls\nRunner",
+        24,
+        1,
+      )
       .setOrigin(0.5)
       .setDepth(2);
 
@@ -47,13 +48,13 @@ export class MainMenu extends Phaser.Scene {
       .setDepth(1);
 
     const optionsText = this.add
-      .text(options.x, options.y, "Options")
+      .bitmapText(options.x, options.y, "pixelFont", "Options", 20)
       .setOrigin(0.5)
       .setDepth(2);
 
     this.add
-      .image(DEFAULT_WIDTH * 0.5, 40, "panel")
-      .setDisplaySize(titleText.width + buttonStyle.gap, 60)
+      .image(DEFAULT_WIDTH * 0.5 - 1, 38, "panel")
+      .setDisplaySize(titleText.width + buttonStyle.gap, titleText.height + 20)
       .setTint(0x10c010);
 
     const background = this.add
@@ -65,7 +66,6 @@ export class MainMenu extends Phaser.Scene {
       DEFAULT_HEIGHT / background.height,
     );
 
-    // background.setDepth(0);
     background.setScale(scaleBackground);
 
     play.setInteractive();
@@ -173,8 +173,16 @@ export class MainMenu extends Phaser.Scene {
   }
 
   private changeElementsVisibility(
-    visibleElements: Array<Phaser.GameObjects.Image | Phaser.GameObjects.Text>,
-    hiddenElements: Array<Phaser.GameObjects.Image | Phaser.GameObjects.Text>,
+    visibleElements: Array<
+      | Phaser.GameObjects.Image
+      | Phaser.GameObjects.Text
+      | Phaser.GameObjects.BitmapText
+    >,
+    hiddenElements: Array<
+      | Phaser.GameObjects.Image
+      | Phaser.GameObjects.Text
+      | Phaser.GameObjects.BitmapText
+    >,
   ) {
     for (const element of visibleElements) {
       element.setVisible(true);
