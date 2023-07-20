@@ -45,7 +45,9 @@ export class MainScene extends Phaser.Scene {
   }
 
   create() {
-    this.sound.play("background", { loop: true, volume: 0.1 });
+    this.cameras.main.fadeIn();
+
+    this.sound.play("background", { loop: true, volume: 0.1, delay: 0.5 });
 
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("tiles_packed", "tileset");
@@ -265,9 +267,7 @@ export class MainScene extends Phaser.Scene {
       });
     });
 
-    this.physics.add.overlap(this.player, finish, () => {
-      console.log("finish");
-    });
+    this.physics.add.overlap(this.player, finish, () => {});
 
     this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
       if (!(jumper instanceof Phaser.Physics.Arcade.Sprite)) {
@@ -294,9 +294,9 @@ export class MainScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, all);
 
-    this.cameras.main.setBounds(all.x, all.y + 200, 2000, 2000);
+    this.cameras.main.setBounds(all.x, all.y, all.width, all.height);
 
-    this.physics.world.setBounds(all.x, all.y, 2000, 2000);
+    this.physics.world.setBounds(all.x, all.y, all.width, all.height);
 
     this.cameras.main.startFollow(this.player);
   }
