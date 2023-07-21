@@ -3,7 +3,7 @@ import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.mi
 
 import { Player } from "@/components";
 import { isNumber } from "@/helpers";
-import { TILE_SIZE } from "@/constants";
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH, TILE_SIZE } from "@/constants";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -237,7 +237,7 @@ export class MainScene extends Phaser.Scene {
       this.player?.collectCoin();
       scoreText.setText(`Coins: ${this.player?.coins}`);
 
-      this.sound.play("coin", { volume: 0.2 });
+      this.sound.play("coin", { volume: 0.5 });
       coin.destroy();
     });
 
@@ -281,7 +281,13 @@ export class MainScene extends Phaser.Scene {
       });
     });
 
-    this.physics.add.overlap(this.player, finish, () => {});
+    this.physics.add.overlap(this.player, finish, (_, finish) => {
+      if (!(finish instanceof Phaser.GameObjects.Rectangle)) {
+        throw new Error("Finish not found");
+      }
+
+      this.end(finish);
+    });
 
     this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
       if (!(jumper instanceof Phaser.Physics.Arcade.Sprite)) {
@@ -313,6 +319,43 @@ export class MainScene extends Phaser.Scene {
     this.physics.world.setBounds(all.x, all.y, all.width, all.height);
 
     this.cameras.main.startFollow(this.player);
+  }
+
+  private end(
+    finish: (
+      | Phaser.Tilemaps.Tile
+      | Phaser.Types.Physics.Arcade.GameObjectWithBody
+    ) &
+      Phaser.GameObjects.Rectangle,
+  ): void {
+    finish.destroy();
+
+    this.cameras.main.fadeOut();
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.add
+        .rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT, 0x000000)
+        .setScale(10)
+        .setScrollFactor(0);
+
+      this.add
+        .bitmapText(
+          DEFAULT_WIDTH * 0.5,
+          DEFAULT_HEIGHT * 0.5,
+          "pixelFont",
+          "You win!",
+          20,
+        )
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1);
+
+      this.cameras.main.fadeIn();
+    });
+
+    this.player?.disableKeys();
+
+    this.sound.stopAll();
+    this.sound.play("win", { volume: 0.2 });
   }
 
   update(): void {

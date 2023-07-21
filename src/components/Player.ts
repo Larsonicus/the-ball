@@ -2,9 +2,10 @@ import Phaser from "phaser";
 import { PLAYER_TEXTURE_KEY } from "@/constants";
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
+  public isDisableKeys = false;
+  public coins = 0;
   private isDead = false;
   private keys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
-  coins = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, PLAYER_TEXTURE_KEY);
@@ -111,12 +112,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setCollideWorldBounds(true);
   }
 
+  public enableKeys(): void {
+    this.isDisableKeys = false;
+  }
+
+  public disableKeys(): void {
+    this.isDisableKeys = true;
+  }
+
   update(): void {
     if (!this.keys || !this.body) {
       throw new Error("Keys/body not found");
     }
 
-    if (this.isDead) {
+    if (this.isDead || this.isDisableKeys) {
       return;
     }
 
