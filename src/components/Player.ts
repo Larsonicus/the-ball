@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { PLAYER_TEXTURE_KEY } from "@/constants";
+import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public isDisableKeys = false;
@@ -8,7 +8,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, PLAYER_TEXTURE_KEY);
+    super(scene, x, y, ENTITY_SPRITE_KEYS.PLAYER);
 
     this.initKeys(scene.input);
 
@@ -32,9 +32,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.isDead = true;
 
-    this.anims.play("dead", true);
+    this.anims.play(ANIMATION_KEYS.PLAYER_DEAD, true);
 
-    this.scene.sound.play("death");
+    this.scene.sound.play(SOUND_KEYS.DEATH);
 
     this.setVelocity(0);
 
@@ -58,14 +58,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private initAnims(scene: Phaser.Scene): void {
     scene.anims.create({
-      key: "turn",
-      frames: [{ key: PLAYER_TEXTURE_KEY, frame: 0 }],
+      key: ANIMATION_KEYS.PLAYER_TURN,
+      frames: [{ key: ENTITY_SPRITE_KEYS.PLAYER, frame: 0 }],
       frameRate: 20,
     });
 
     this.anims.create({
-      key: "left",
-      frames: this.anims.generateFrameNumbers(PLAYER_TEXTURE_KEY, {
+      key: ANIMATION_KEYS.PLAYER_LEFT,
+      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.PLAYER, {
         start: 19,
         end: 23,
       }),
@@ -74,8 +74,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     this.anims.create({
-      key: "dead",
-      frames: this.anims.generateFrameNumbers(PLAYER_TEXTURE_KEY, {
+      key: ANIMATION_KEYS.PLAYER_DEAD,
+      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.PLAYER, {
         start: 24,
         end: 27,
       }),
@@ -84,8 +84,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     scene.anims.create({
-      key: "right",
-      frames: this.anims.generateFrameNumbers(PLAYER_TEXTURE_KEY, {
+      key: ANIMATION_KEYS.PLAYER_RIGHT,
+      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.PLAYER, {
         start: 14,
         end: 18,
       }),
@@ -120,7 +120,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.isDisableKeys = true;
   }
 
-  update(): void {
+  public update(): void {
     if (!this.keys || !this.body) {
       throw new Error("Keys/body not found");
     }
@@ -132,15 +132,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.keys.left.isDown) {
       this.setVelocityX(-160);
 
-      this.anims.play("left", true);
+      this.anims.play(ANIMATION_KEYS.PLAYER_LEFT, true);
     } else if (this.keys.right.isDown) {
       this.setVelocityX(160);
 
-      this.anims.play("right", true);
+      this.anims.play(ANIMATION_KEYS.PLAYER_RIGHT, true);
     } else {
       this.setVelocityX(0);
 
-      this.anims.play("turn");
+      this.anims.play(ANIMATION_KEYS.PLAYER_TURN);
     }
 
     if (
@@ -150,7 +150,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     ) {
       this.setVelocityY(-330);
 
-      this.scene.sound.play("jump");
+      this.scene.sound.play(SOUND_KEYS.JUMP);
     }
   }
 }

@@ -1,18 +1,25 @@
 import Phaser from "phaser";
 
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from "@/constants";
+import {
+  DEFAULT_HEIGHT,
+  DEFAULT_WIDTH,
+  FONT_KEY,
+  MUSIC_KEYS,
+  SCENE_KEYS,
+  UI_KEYS,
+} from "@/constants";
 
 export class MainMenu extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Image[] = [];
 
   constructor() {
-    super({ key: "main-menu" });
+    super({ key: SCENE_KEYS.MAIN_MENU });
   }
 
   create() {
     this.cameras.main.fadeIn();
 
-    this.sound.play("menu", { loop: true, volume: 0.1, delay: 0.5 });
+    this.sound.play(MUSIC_KEYS.MENU, { loop: true, volume: 0.1, delay: 0.5 });
 
     const buttonStyle = {
       width: 75,
@@ -21,44 +28,37 @@ export class MainMenu extends Phaser.Scene {
     };
 
     const play = this.add
-      .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, "orange-button")
+      .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, UI_KEYS.ORANGE_BUTTON)
       .setDisplaySize(buttonStyle.width, buttonStyle.height)
       .setDepth(1);
 
     const playText = this.add
-      .bitmapText(play.x, play.y, "pixelFont", "Play", 20)
+      .bitmapText(play.x, play.y, FONT_KEY, "Play", 20)
       .setOrigin(0.5)
       .setDepth(2);
 
     const titleText = this.add
-      .bitmapText(
-        DEFAULT_WIDTH * 0.5,
-        40,
-        "pixelFont",
-        "Huge Ball\nRunner",
-        24,
-        1,
-      )
+      .bitmapText(DEFAULT_WIDTH * 0.5, 40, FONT_KEY, "Huge Ball\nRunner", 24, 1)
       .setOrigin(0.5)
       .setDepth(2);
 
     const options = this.add
-      .image(play.x, play.y + play.displayHeight + 10, "button")
+      .image(play.x, play.y + play.displayHeight + 10, UI_KEYS.BUTTON)
       .setDisplaySize(buttonStyle.width, buttonStyle.height)
       .setDepth(1);
 
     const optionsText = this.add
-      .bitmapText(options.x, options.y, "pixelFont", "Options", 20)
+      .bitmapText(options.x, options.y, FONT_KEY, "Options", 20)
       .setOrigin(0.5)
       .setDepth(2);
 
     this.add
-      .image(DEFAULT_WIDTH * 0.5 - 1, 38, "panel")
+      .image(DEFAULT_WIDTH * 0.5 - 1, 38, UI_KEYS.PANEL)
       .setDisplaySize(titleText.width + buttonStyle.gap, titleText.height + 20)
       .setTint(0x10c010);
 
     const background = this.add
-      .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, "background-ui")
+      .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, UI_KEYS.BACKGROUND)
       .setDepth(-1);
 
     const scaleBackground = Math.max(
@@ -74,11 +74,11 @@ export class MainMenu extends Phaser.Scene {
     });
 
     play.on("pointerdown", () => {
-      play.setTexture("orange-button-pressed");
+      play.setTexture(UI_KEYS.ORANGE_BUTTON_PRESSED);
     });
 
     play.on("pointerout", () => {
-      play.setTexture("orange-button");
+      play.setTexture(UI_KEYS.ORANGE_BUTTON);
       play.clearTint();
     });
 
@@ -87,22 +87,22 @@ export class MainMenu extends Phaser.Scene {
       this.sound.stopAll();
 
       this.time.delayedCall(1000, () => {
-        this.scene.start("main");
+        this.scene.start(SCENE_KEYS.MAIN);
       });
     });
 
     this.buttons.push(play);
     this.buttons.push(options);
 
-    const panel = this.add
-      .image(play.x, play.y + buttonStyle.height * 0.5 + 4, "grey-panel")
+    const backgroundPanel = this.add
+      .image(play.x, play.y + buttonStyle.height * 0.5 + 4, UI_KEYS.GREY_PANEL)
       .setDisplaySize(
         this.buttons.length * buttonStyle.width,
         this.buttons.length * buttonStyle.height + 15 + 40,
       );
 
     const sounds = this.add
-      .image(panel.x, panel.y, "sounds")
+      .image(backgroundPanel.x, backgroundPanel.y, UI_KEYS.SOUNDS)
       .setOrigin(0.5)
       .setDisplaySize(36, 36)
       .setDepth(2)
@@ -111,9 +111,9 @@ export class MainMenu extends Phaser.Scene {
 
     const closeOptions = this.add
       .image(
-        panel.x + panel.displayWidth * 0.5 - 15,
-        panel.y - panel.displayHeight * 0.5 + 15,
-        "close",
+        backgroundPanel.x + backgroundPanel.displayWidth * 0.5 - 15,
+        backgroundPanel.y - backgroundPanel.displayHeight * 0.5 + 15,
+        UI_KEYS.CLOSE,
       )
       .setOrigin(0.5)
       .setDisplaySize(10, 10)
@@ -132,7 +132,7 @@ export class MainMenu extends Phaser.Scene {
     });
 
     options.on("pointerout", () => {
-      options.setTexture("button");
+      options.setTexture(UI_KEYS.BUTTON);
       options.clearTint();
     });
 
@@ -152,7 +152,7 @@ export class MainMenu extends Phaser.Scene {
     });
 
     sounds.on("pointerup", () => {
-      sounds.setTexture(this.sound.mute ? "sounds" : "sounds-off");
+      sounds.setTexture(this.sound.mute ? UI_KEYS.SOUNDS : UI_KEYS.SOUNDS_OFF);
       this.sound.setMute(!this.sound.mute);
     });
 

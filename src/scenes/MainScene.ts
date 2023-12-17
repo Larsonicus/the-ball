@@ -3,7 +3,20 @@ import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.mi
 
 import { Player } from "@/components";
 import { isNumber } from "@/helpers";
-import { DEFAULT_HEIGHT, DEFAULT_WIDTH, TILE_SIZE } from "@/constants";
+import {
+  DEFAULT_HEIGHT,
+  DEFAULT_WIDTH,
+  TILE_SIZE,
+  ENTITY_IMAGE_KEYS,
+  ENTITY_SPRITE_KEYS,
+  FONT_KEY,
+  LEVEL_KEYS,
+  MUSIC_KEYS,
+  SCENE_KEYS,
+  SOUND_KEYS,
+  ANIMATION_KEYS,
+  PLUGIN_KEYS,
+} from "@/constants";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -18,7 +31,7 @@ export class MainScene extends Phaser.Scene {
   checkPoint: { x: number; y: number } | null = null;
 
   constructor() {
-    super({ key: "main" });
+    super({ key: SCENE_KEYS.MAIN });
   }
 
   private createGroup(): Phaser.Physics.Arcade.Group {
@@ -30,15 +43,18 @@ export class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.scenePlugin(
-      "animatedTiles",
+      PLUGIN_KEYS.ANIMATED_TILES,
       AnimatedTiles,
-      "animatedTiles",
-      "main",
+      PLUGIN_KEYS.ANIMATED_TILES,
+      SCENE_KEYS.MAIN,
     );
 
     this.anims.create({
-      key: "coin-spin",
-      frames: this.anims.generateFrameNumbers("coin", { start: 0, end: 1 }),
+      key: ANIMATION_KEYS.COIN_SPIN,
+      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.COIN, {
+        start: 0,
+        end: 1,
+      }),
       frameRate: 10,
       repeat: -1,
     });
@@ -47,10 +63,14 @@ export class MainScene extends Phaser.Scene {
   create() {
     this.cameras.main.fadeIn();
 
-    this.sound.play("background", { loop: true, volume: 0.1, delay: 0.5 });
+    this.sound.play(MUSIC_KEYS.BACKGROUND, {
+      loop: true,
+      volume: 0.1,
+      delay: 0.5,
+    });
 
-    const map = this.make.tilemap({ key: "map" });
-    const tileset = map.addTilesetImage("tiles_packed", "tileset");
+    const map = this.make.tilemap({ key: LEVEL_KEYS.TILEMAP });
+    const tileset = map.addTilesetImage("tiles_packed", LEVEL_KEYS.TILESET);
 
     if (!tileset) {
       throw new Error("Tileset not found");
@@ -63,8 +83,10 @@ export class MainScene extends Phaser.Scene {
     }
 
     (
-      this.sys as typeof this.sys & { animatedTiles: AnimatedTiles }
-    ).animatedTiles.init(map);
+      this.sys as typeof this.sys & {
+        [PLUGIN_KEYS.ANIMATED_TILES]: AnimatedTiles;
+      }
+    )[PLUGIN_KEYS.ANIMATED_TILES].init(map);
 
     this.spikes = this.createGroup();
     this.coins = this.createGroup();
@@ -81,9 +103,9 @@ export class MainScene extends Phaser.Scene {
         throw new Error("Coin physics not found");
       }
 
-      const coinSprite = this.coins
-        ?.create(coin.x, coin.y - coin.height / 2, "coin")
-        .setOrigin(0, 0.5) as Phaser.Physics.Arcade.Sprite;
+      const coinSprite: Phaser.Physics.Arcade.Sprite = this.coins
+        ?.create(coin.x, coin.y - coin.height / 2, ENTITY_SPRITE_KEYS.COIN)
+        .setOrigin(0, 0.5);
 
       if (!coinSprite.body) {
         throw new Error("Coin body not found");
@@ -95,7 +117,7 @@ export class MainScene extends Phaser.Scene {
         coin.height * 0.5 - coin.height * 0.25,
       );
 
-      coinSprite.anims.play("coin-spin", true);
+      coinSprite.anims.play(ANIMATION_KEYS.COIN_SPIN, true);
     });
 
     map.getObjectLayer("checkPoints")?.objects.forEach((checkPoint) => {
@@ -109,7 +131,7 @@ export class MainScene extends Phaser.Scene {
       }
 
       const checkPointSprite = this.checkPoints
-        ?.create(checkPoint.x, checkPoint.y, "checkpoint")
+        ?.create(checkPoint.x, checkPoint.y, ENTITY_IMAGE_KEYS.CHECKPOINT)
         .setOrigin(0, 1) as Phaser.Physics.Arcade.Sprite;
 
       if (!checkPointSprite.body) {
@@ -133,7 +155,7 @@ export class MainScene extends Phaser.Scene {
       const jumperSprite: Phaser.Physics.Arcade.Sprite = this.jumpers?.create(
         jumper.x,
         jumper.y,
-        "jumper",
+        ENTITY_IMAGE_KEYS.JUMPER,
       );
 
       jumperSprite.setOrigin(0, 1);
@@ -165,7 +187,7 @@ export class MainScene extends Phaser.Scene {
         spike.rotation === 180
           ? spike.y + spike.height
           : spike.y - spike.height,
-        "spike",
+        ENTITY_IMAGE_KEYS.SPIKE,
       );
 
       spikeSprite.setOrigin(0);
@@ -222,13 +244,13 @@ export class MainScene extends Phaser.Scene {
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
     this.add
-      .image(5, 6, "coin")
+      .image(5, 6, ENTITY_SPRITE_KEYS.COIN)
       .setOrigin(0, 0.5)
       .setDisplayOrigin(0, 0)
       .setScrollFactor(0);
 
     const scoreText = this.add
-      .bitmapText(25, 10, "pixelFont", "Coins: 0")
+      .bitmapText(25, 10, FONT_KEY, "Coins: 0")
       .setOrigin(0.5)
       .setDisplayOrigin(0, 0)
       .setScrollFactor(0);
@@ -237,7 +259,7 @@ export class MainScene extends Phaser.Scene {
       this.player?.collectCoin();
       scoreText.setText(`Coins: ${this.player?.coins}`);
 
-      this.sound.play("coin", { volume: 0.5 });
+      this.sound.play(SOUND_KEYS.COIN, { volume: 0.5 });
       coin.destroy();
     });
 
@@ -250,9 +272,9 @@ export class MainScene extends Phaser.Scene {
         return;
       }
 
-      checkPoint.setTexture("checkpoint-pressed");
+      checkPoint.setTexture(ENTITY_IMAGE_KEYS.CHECKPOINT_PRESSED);
 
-      this.sound.play("checkpoint", { volume: 0.2 });
+      this.sound.play(SOUND_KEYS.CHECKPOINT, { volume: 0.2 });
 
       checkPoint.setData("isPressed", true);
 
@@ -300,14 +322,14 @@ export class MainScene extends Phaser.Scene {
 
       this.player?.onJumper();
 
-      jumper.setTexture("jumper-active");
+      jumper.setTexture(ENTITY_IMAGE_KEYS.JUMPER_ACTIVE);
 
-      this.sound.play("jumper", { volume: 0.2 });
+      this.sound.play(SOUND_KEYS.JUMPER, { volume: 0.2 });
 
       this.time.addEvent({
         delay: 300,
         callback: () => {
-          jumper.setTexture("jumper");
+          jumper.setTexture(ENTITY_IMAGE_KEYS.JUMPER);
         },
       });
     });
@@ -341,7 +363,7 @@ export class MainScene extends Phaser.Scene {
         .bitmapText(
           DEFAULT_WIDTH * 0.5,
           DEFAULT_HEIGHT * 0.5,
-          "pixelFont",
+          FONT_KEY,
           "You win!",
           20,
         )
@@ -355,7 +377,7 @@ export class MainScene extends Phaser.Scene {
     this.player?.disableKeys();
 
     this.sound.stopAll();
-    this.sound.play("win", { volume: 0.2 });
+    this.sound.play(SOUND_KEYS.WIN, { volume: 0.2 });
   }
 
   update(): void {
