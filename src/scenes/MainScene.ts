@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
 import { Player, Score } from "@/components";
-import { isNumber } from "@/helpers";
+import { isNumber, hasPhysics } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_WIDTH,
@@ -94,12 +94,7 @@ export class MainScene extends Phaser.Scene {
     this.checkPoints = this.createGroup();
 
     map.getObjectLayer("coins")?.objects.forEach((coin) => {
-      if (
-        !isNumber(coin.x) ||
-        !isNumber(coin.y) ||
-        !isNumber(coin.height) ||
-        !isNumber(coin.width)
-      ) {
+      if (!hasPhysics(coin)) {
         throw new Error("Coin physics not found");
       }
 
@@ -121,18 +116,13 @@ export class MainScene extends Phaser.Scene {
     });
 
     map.getObjectLayer("checkPoints")?.objects.forEach((checkPoint) => {
-      if (
-        !isNumber(checkPoint.x) ||
-        !isNumber(checkPoint.y) ||
-        !isNumber(checkPoint.height) ||
-        !isNumber(checkPoint.width)
-      ) {
+      if (!hasPhysics(checkPoint)) {
         throw new Error("CheckPoint physics not found");
       }
 
-      const checkPointSprite = this.checkPoints
+      const checkPointSprite: Phaser.Physics.Arcade.Sprite = this.checkPoints
         ?.create(checkPoint.x, checkPoint.y, ENTITY_IMAGE_KEYS.CHECKPOINT)
-        .setOrigin(0, 1) as Phaser.Physics.Arcade.Sprite;
+        .setOrigin(0, 1);
 
       if (!checkPointSprite.body) {
         throw new Error("CheckPoint body not found");
@@ -143,22 +133,13 @@ export class MainScene extends Phaser.Scene {
     });
 
     map.getObjectLayer("jumpers")?.objects.forEach((jumper) => {
-      if (
-        !isNumber(jumper.x) ||
-        !isNumber(jumper.y) ||
-        !isNumber(jumper.height) ||
-        !isNumber(jumper.width)
-      ) {
+      if (!hasPhysics(jumper)) {
         throw new Error("Jumper physics not found");
       }
 
-      const jumperSprite: Phaser.Physics.Arcade.Sprite = this.jumpers?.create(
-        jumper.x,
-        jumper.y,
-        ENTITY_IMAGE_KEYS.JUMPER,
-      );
-
-      jumperSprite.setOrigin(0, 1);
+      const jumperSprite: Phaser.Physics.Arcade.Sprite = this.jumpers
+        ?.create(jumper.x, jumper.y, ENTITY_IMAGE_KEYS.JUMPER)
+        .setOrigin(0, 1);
 
       if (!jumperSprite.body) {
         throw new Error("Jumper body not found");
@@ -169,12 +150,7 @@ export class MainScene extends Phaser.Scene {
     });
 
     map.getObjectLayer("spikes")?.objects.forEach((spike) => {
-      if (
-        !isNumber(spike.y) ||
-        !isNumber(spike.height) ||
-        !isNumber(spike.width) ||
-        !isNumber(spike.x)
-      ) {
+      if (!hasPhysics(spike)) {
         throw new Error("Spike physics not found");
       }
 
@@ -182,17 +158,16 @@ export class MainScene extends Phaser.Scene {
         throw new Error("Spikes group not created");
       }
 
-      const spikeSprite: Phaser.Physics.Arcade.Sprite = this.spikes.create(
-        spike.x,
-        spike.rotation === 180
-          ? spike.y + spike.height
-          : spike.y - spike.height,
-        ENTITY_IMAGE_KEYS.SPIKE,
-      );
-
-      spikeSprite.setOrigin(0);
-
-      spikeSprite.setAngle(spike.rotation);
+      const spikeSprite: Phaser.Physics.Arcade.Sprite = this.spikes
+        .create(
+          spike.x,
+          spike.rotation === 180
+            ? spike.y + spike.height
+            : spike.y - spike.height,
+          ENTITY_IMAGE_KEYS.SPIKE,
+        )
+        .setOrigin(0)
+        .setAngle(spike.rotation);
 
       if (!spikeSprite.body) {
         throw new Error("Spike body not found");

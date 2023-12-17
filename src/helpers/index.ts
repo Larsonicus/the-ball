@@ -1,1 +1,2 @@
-export { isNumber } from "./isNumber";
+export * from "./hasPhysics";
+export * from "./isNumber";
