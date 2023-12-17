@@ -1,2 +1,3 @@
-export { MainScene } from "./MainScene";
-export { PreloadScene } from "./PreloadScene";
+export * from "./MainMenu";
+export * from "./MainScene";
+export * from "./PreloadScene";
