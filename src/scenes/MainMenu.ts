@@ -9,54 +9,82 @@ import {
   UI_KEYS,
 } from "@/constants";
 
+type Element =
+  | Phaser.GameObjects.Image
+  | Phaser.GameObjects.Text
+  | Phaser.GameObjects.BitmapText;
+
 export class MainMenu extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Image[] = [];
+
+  private buttonStyle = {
+    width: 75,
+    height: 40,
+    gap: 10,
+  };
 
   constructor() {
     super({ key: SCENE_KEYS.MAIN_MENU });
   }
 
-  create() {
+  public create() {
     this.cameras.main.fadeIn();
 
     this.sound.play(MUSIC_KEYS.MENU, { loop: true, volume: 0.1, delay: 0.5 });
 
-    const buttonStyle = {
-      width: 75,
-      height: 40,
-      gap: 10,
-    };
+    this.addBackground();
+    this.addTitle();
 
-    const play = this.add
-      .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, UI_KEYS.ORANGE_BUTTON)
-      .setDisplaySize(buttonStyle.width, buttonStyle.height)
-      .setDepth(1);
+    const [playButton, playText] = this.addPlayButton(
+      DEFAULT_WIDTH * 0.5,
+      DEFAULT_HEIGHT * 0.5,
+    );
 
-    const playText = this.add
-      .bitmapText(play.x, play.y, FONT_KEY, "Play", 20)
-      .setOrigin(0.5)
-      .setDepth(2);
+    const [optionsButton, optionsText] = this.addOptionsButton(
+      playButton.x,
+      playButton.y + playButton.displayHeight + 10,
+    );
 
-    const titleText = this.add
-      .bitmapText(DEFAULT_WIDTH * 0.5, 40, FONT_KEY, "Huge Ball\nRunner", 24, 1)
-      .setOrigin(0.5)
-      .setDepth(2);
+    const backgroundPanel = this.addBackgroundPanel(
+      playButton.x,
+      playButton.y + this.buttonStyle.height * 0.5 + 4,
+    );
 
-    const options = this.add
-      .image(play.x, play.y + play.displayHeight + 10, UI_KEYS.BUTTON)
-      .setDisplaySize(buttonStyle.width, buttonStyle.height)
-      .setDepth(1);
+    const soundsButton = this.addSoundsButton(
+      backgroundPanel.x,
+      backgroundPanel.y,
+    );
 
-    const optionsText = this.add
-      .bitmapText(options.x, options.y, FONT_KEY, "Options", 20)
-      .setOrigin(0.5)
-      .setDepth(2);
+    const closeOptionsButton = this.addCloseOptionsButton(
+      backgroundPanel.x + backgroundPanel.displayWidth * 0.5 - 15,
+      backgroundPanel.y - backgroundPanel.displayHeight * 0.5 + 15,
+    );
 
-    this.add
-      .image(DEFAULT_WIDTH * 0.5 - 1, 38, UI_KEYS.PANEL)
-      .setDisplaySize(titleText.width + buttonStyle.gap, titleText.height + 20)
-      .setTint(0x10c010);
+    this.addOptionsButtonEventHandlers(optionsButton, optionsText, {
+      visible: [closeOptionsButton, soundsButton],
+      hidden: [playButton, playText],
+    });
 
+    this.addCloseOptionsButtonEventHandlers(closeOptionsButton, {
+      visible: [playButton, playText, optionsButton, optionsText],
+      hidden: [soundsButton],
+    });
+  }
+
+  private changeElementsVisibility(
+    visible: Array<Element>,
+    hidden: Array<Element>,
+  ) {
+    for (const element of visible) {
+      element.setVisible(true);
+    }
+
+    for (const element of hidden) {
+      element.setVisible(false);
+    }
+  }
+
+  private addBackground() {
     const background = this.add
       .image(DEFAULT_WIDTH * 0.5, DEFAULT_HEIGHT * 0.5, UI_KEYS.BACKGROUND)
       .setDepth(-1);
@@ -67,22 +95,35 @@ export class MainMenu extends Phaser.Scene {
     );
 
     background.setScale(scaleBackground);
+  }
 
-    play.setInteractive();
-    play.on("pointerover", () => {
-      play.setTint(0xffa500);
+  private addPlayButton(x: number, y: number) {
+    const button = this.add
+      .image(x, y, UI_KEYS.ORANGE_BUTTON)
+      .setDisplaySize(this.buttonStyle.width, this.buttonStyle.height)
+      .setDepth(1);
+
+    const text = this.add
+      .bitmapText(button.x, button.y, FONT_KEY, "Play", 20)
+      .setOrigin(0.5)
+      .setDepth(2);
+
+    button.setInteractive();
+
+    button.on("pointerover", () => {
+      button.setTint(0xffa500);
     });
 
-    play.on("pointerdown", () => {
-      play.setTexture(UI_KEYS.ORANGE_BUTTON_PRESSED);
+    button.on("pointerdown", () => {
+      button.setTexture(UI_KEYS.ORANGE_BUTTON_PRESSED);
     });
 
-    play.on("pointerout", () => {
-      play.setTexture(UI_KEYS.ORANGE_BUTTON);
-      play.clearTint();
+    button.on("pointerout", () => {
+      button.setTexture(UI_KEYS.ORANGE_BUTTON);
+      button.clearTint();
     });
 
-    play.on("pointerup", () => {
+    button.on("pointerup", () => {
       this.cameras.main.fadeOut(750);
       this.sound.stopAll();
 
@@ -91,30 +132,112 @@ export class MainMenu extends Phaser.Scene {
       });
     });
 
-    this.buttons.push(play);
-    this.buttons.push(options);
+    this.buttons.push(button);
 
-    const backgroundPanel = this.add
-      .image(play.x, play.y + buttonStyle.height * 0.5 + 4, UI_KEYS.GREY_PANEL)
+    return [button, text] as const;
+  }
+
+  private addOptionsButton(x: number, y: number) {
+    const button = this.add
+      .image(x, y, UI_KEYS.BUTTON)
+      .setDisplaySize(this.buttonStyle.width, this.buttonStyle.height)
+      .setDepth(1);
+
+    const text = this.add
+      .bitmapText(button.x, button.y, FONT_KEY, "Options", 20)
+      .setOrigin(0.5)
+      .setDepth(2);
+
+    button.setInteractive();
+
+    this.buttons.push(button);
+
+    return [button, text] as const;
+  }
+
+  private addOptionsButtonEventHandlers(
+    button: Phaser.GameObjects.Image,
+    text: Phaser.GameObjects.BitmapText,
+    elementVisibility: {
+      visible: Array<Element>;
+      hidden: Array<Element>;
+    },
+  ) {
+    button.on("pointerover", () => {
+      button.setTint(0x7878ff);
+    });
+
+    button.on("pointerdown", () => {
+      button.setTexture("button-pressed");
+    });
+
+    button.on("pointerout", () => {
+      button.setTexture(UI_KEYS.BUTTON);
+      button.clearTint();
+    });
+
+    button.on("pointerup", () => {
+      this.changeElementsVisibility(elementVisibility.visible, [
+        button,
+        text,
+        ...elementVisibility.hidden,
+      ]);
+    });
+  }
+
+  private addTitle() {
+    const title = this.add
+      .bitmapText(DEFAULT_WIDTH * 0.5, 40, FONT_KEY, "Huge Ball\nRunner", 24, 1)
+      .setOrigin(0.5)
+      .setDepth(2);
+
+    this.add
+      .image(DEFAULT_WIDTH * 0.5 - 1, 38, UI_KEYS.PANEL)
+      .setDisplaySize(title.width + this.buttonStyle.gap, title.height + 20)
+      .setTint(0x10c010);
+
+    return title;
+  }
+
+  private addBackgroundPanel(x: number, y: number) {
+    const panel = this.add
+      .image(x, y, UI_KEYS.GREY_PANEL)
       .setDisplaySize(
-        this.buttons.length * buttonStyle.width,
-        this.buttons.length * buttonStyle.height + 15 + 40,
+        this.buttons.length * this.buttonStyle.width,
+        this.buttons.length * this.buttonStyle.height + 15 + 40,
       );
 
-    const sounds = this.add
-      .image(backgroundPanel.x, backgroundPanel.y, UI_KEYS.SOUNDS)
+    return panel;
+  }
+
+  private addSoundsButton(x: number, y: number) {
+    const button = this.add
+      .image(x, y, UI_KEYS.SOUNDS)
       .setOrigin(0.5)
       .setDisplaySize(36, 36)
       .setDepth(2)
       .setVisible(false)
       .setInteractive();
 
-    const closeOptions = this.add
-      .image(
-        backgroundPanel.x + backgroundPanel.displayWidth * 0.5 - 15,
-        backgroundPanel.y - backgroundPanel.displayHeight * 0.5 + 15,
-        UI_KEYS.CLOSE,
-      )
+    button.on("pointerover", () => {
+      button.setTint(0xdd118f);
+    });
+
+    button.on("pointerout", () => {
+      button.clearTint();
+    });
+
+    button.on("pointerup", () => {
+      button.setTexture(this.sound.mute ? UI_KEYS.SOUNDS : UI_KEYS.SOUNDS_OFF);
+      this.sound.setMute(!this.sound.mute);
+    });
+
+    return button;
+  }
+
+  private addCloseOptionsButton(x: number, y: number) {
+    const button = this.add
+      .image(x, y, UI_KEYS.CLOSE)
       .setOrigin(0.5)
       .setDisplaySize(10, 10)
       .setTint(0xaa0000)
@@ -122,74 +245,29 @@ export class MainMenu extends Phaser.Scene {
       .setVisible(false)
       .setInteractive();
 
-    options.setInteractive();
-    options.on("pointerover", () => {
-      options.setTint(0x7878ff);
-    });
-
-    options.on("pointerdown", () => {
-      options.setTexture("button-pressed");
-    });
-
-    options.on("pointerout", () => {
-      options.setTexture(UI_KEYS.BUTTON);
-      options.clearTint();
-    });
-
-    options.on("pointerup", () => {
-      this.changeElementsVisibility(
-        [closeOptions, sounds],
-        [play, playText, options, optionsText],
-      );
-    });
-
-    sounds.on("pointerover", () => {
-      sounds.setTint(0xdd118f);
-    });
-
-    sounds.on("pointerout", () => {
-      sounds.clearTint();
-    });
-
-    sounds.on("pointerup", () => {
-      sounds.setTexture(this.sound.mute ? UI_KEYS.SOUNDS : UI_KEYS.SOUNDS_OFF);
-      this.sound.setMute(!this.sound.mute);
-    });
-
-    closeOptions.on("pointerover", () => {
-      closeOptions.setTint(0xff0000);
-    });
-
-    closeOptions.on("pointerout", () => {
-      closeOptions.setTint(0xaa0000);
-    });
-
-    closeOptions.on("pointerup", () => {
-      this.changeElementsVisibility(
-        [play, playText, options, optionsText],
-        [closeOptions, sounds],
-      );
-    });
+    return button;
   }
 
-  private changeElementsVisibility(
-    visibleElements: Array<
-      | Phaser.GameObjects.Image
-      | Phaser.GameObjects.Text
-      | Phaser.GameObjects.BitmapText
-    >,
-    hiddenElements: Array<
-      | Phaser.GameObjects.Image
-      | Phaser.GameObjects.Text
-      | Phaser.GameObjects.BitmapText
-    >,
+  private addCloseOptionsButtonEventHandlers(
+    button: Phaser.GameObjects.Image,
+    elementVisibility: {
+      visible: Array<Element>;
+      hidden: Array<Element>;
+    },
   ) {
-    for (const element of visibleElements) {
-      element.setVisible(true);
-    }
+    button.on("pointerover", () => {
+      button.setTint(0xff0000);
+    });
 
-    for (const element of hiddenElements) {
-      element.setVisible(false);
-    }
+    button.on("pointerout", () => {
+      button.setTint(0xaa0000);
+    });
+
+    button.on("pointerup", () => {
+      this.changeElementsVisibility(elementVisibility.visible, [
+        button,
+        ...elementVisibility.hidden,
+      ]);
+    });
   }
 }
