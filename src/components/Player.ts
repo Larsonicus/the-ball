@@ -3,7 +3,6 @@ import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public isDisableKeys = false;
-  public coins = 0;
   private isDead = false;
   private keys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
 
@@ -15,10 +14,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.initAnims(scene);
 
     this.initPhysics(scene);
-  }
-
-  public collectCoin(): void {
-    this.coins++;
   }
 
   public onJumper(): void {

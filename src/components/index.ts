@@ -1,1 +1,2 @@
-export { Player } from "./Player";
+export * from "./Player";
+export * from "./Score";

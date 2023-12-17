@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
-import { Player } from "@/components";
+import { Player, Score } from "@/components";
 import { isNumber } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
@@ -243,21 +243,10 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
-    this.add
-      .image(5, 6, ENTITY_SPRITE_KEYS.COIN)
-      .setOrigin(0, 0.5)
-      .setDisplayOrigin(0, 0)
-      .setScrollFactor(0);
-
-    const scoreText = this.add
-      .bitmapText(25, 10, FONT_KEY, "Coins: 0")
-      .setOrigin(0.5)
-      .setDisplayOrigin(0, 0)
-      .setScrollFactor(0);
+    const score = new Score(this, 5, 6);
 
     this.physics.add.overlap(this.player, this.coins, (_, coin) => {
-      this.player?.collectCoin();
-      scoreText.setText(`Coins: ${this.player?.coins}`);
+      score.increment();
 
       this.sound.play(SOUND_KEYS.COIN, { volume: 0.5 });
       coin.destroy();
