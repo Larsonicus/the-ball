@@ -11,7 +11,7 @@ import {
   CheckpointsGroup,
   Finish,
 } from "@/components";
-import { isNumber } from "@/helpers";
+import { findSpawnpoint } from "@/helpers";
 import {
   TILEMAP_KEYS,
   TILESET_KEYS,
@@ -71,14 +71,7 @@ export class MainScene extends Phaser.Scene {
 
     const score = new Score(this, 5, 6);
 
-    const spawnPoint = map.value.findObject(
-      "spawn",
-      (spawn) => spawn.name === "spawn",
-    );
-
-    if (!spawnPoint || !isNumber(spawnPoint.x) || !isNumber(spawnPoint.y)) {
-      throw new Error("Spawn point not found");
-    }
+    const spawnPoint = findSpawnpoint(map.value);
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y, map.mapLayer);
 
