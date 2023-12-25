@@ -1,4 +1,4 @@
-export interface ITouch<T> {
+export interface ITouch<T, R = void> {
   object: T;
-  callback?: () => void;
+  callback?: (object: R) => void;
 }

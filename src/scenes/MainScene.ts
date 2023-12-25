@@ -8,13 +8,13 @@ import {
   CoinsGroup,
   SpikesGroup,
   JumpersGroup,
+  CheckpointsGroup,
 } from "@/components";
-import { isNumber, hasPhysics } from "@/helpers";
+import { isNumber } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
   DEFAULT_WIDTH,
   TILE_SIZE,
-  ENTITY_IMAGE_KEYS,
   ENTITY_SPRITE_KEYS,
   FONT_KEY,
   TILEMAP_KEYS,
@@ -37,13 +37,6 @@ export class MainScene extends Phaser.Scene {
 
   constructor() {
     super({ key: SCENE_KEYS.MAIN });
-  }
-
-  private createGroup(): Phaser.Physics.Arcade.Group {
-    return this.physics.add.group({
-      allowGravity: false,
-      immovable: true,
-    });
   }
 
   preload() {
@@ -115,13 +108,17 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
+    const checkpoints = new CheckpointsGroup(this, this.map.value, {
+      object: this.player,
+    });
+
     new SpikesGroup(this, this.map.value, {
       object: this.player,
       callback: () =>
         this.player?.die(() => {
           this.player?.setPosition(
-            this.checkPoint?.x ?? spawnPoint.x,
-            this.checkPoint?.y ?? spawnPoint.y,
+            checkpoints.lastCheckpoint?.x ?? spawnPoint.x,
+            checkpoints.lastCheckpoint?.x ?? spawnPoint.y,
           );
         }),
     });
@@ -134,30 +131,6 @@ export class MainScene extends Phaser.Scene {
     new JumpersGroup(this, this.map.value, {
       object: this.player,
     });
-
-    this.checkPoints = this.createGroup();
-
-    this.map.value
-      .getObjectLayer("checkPoints")
-      ?.objects.forEach((checkPoint) => {
-        if (!hasPhysics(checkPoint)) {
-          throw new Error("CheckPoint physics not found");
-        }
-
-        const checkPointSprite: Phaser.Physics.Arcade.Sprite = this.checkPoints
-          ?.create(checkPoint.x, checkPoint.y, ENTITY_IMAGE_KEYS.CHECKPOINT)
-          .setOrigin(0, 1);
-
-        if (!checkPointSprite.body) {
-          throw new Error("CheckPoint body not found");
-        }
-
-        checkPointSprite.body.setSize(
-          checkPoint.width,
-          checkPoint.height * 0.5,
-        );
-        checkPointSprite.body.setOffset(0, checkPoint.height * 0.5);
-      });
 
     const finishPoint = this.map.value.findObject(
       "finishPoint",
@@ -183,24 +156,6 @@ export class MainScene extends Phaser.Scene {
     if (!this.input.keyboard) {
       throw new Error("Keyboard not found");
     }
-
-    this.physics.add.overlap(this.player, this.checkPoints, (_, checkPoint) => {
-      if (!(checkPoint instanceof Phaser.Physics.Arcade.Sprite)) {
-        throw new Error("CheckPoint not found");
-      }
-
-      if (checkPoint.getData("isPressed")) {
-        return;
-      }
-
-      checkPoint.setTexture(ENTITY_IMAGE_KEYS.CHECKPOINT_PRESSED);
-
-      this.sound.play(SOUND_KEYS.CHECKPOINT, { volume: 0.2 });
-
-      checkPoint.setData("isPressed", true);
-
-      this.checkPoint = { x: checkPoint.x, y: checkPoint.y };
-    });
 
     this.physics.add.overlap(this.player, finish, (_, finish) => {
       if (!(finish instanceof Phaser.GameObjects.Rectangle)) {
