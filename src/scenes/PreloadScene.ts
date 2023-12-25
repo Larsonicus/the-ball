@@ -10,7 +10,8 @@ import {
   ENTITY_SPRITE_KEYS,
   MUSIC_KEYS,
   UI_KEYS,
-  LEVEL_KEYS,
+  TILEMAP_KEYS,
+  TILESET_KEYS,
 } from "@/constants";
 
 export class PreloadScene extends Phaser.Scene {
@@ -49,8 +50,8 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   private loadLevel() {
-    this.load.image(LEVEL_KEYS.TILESET, "tiles_packed.png");
-    this.load.tilemapTiledJSON(LEVEL_KEYS.TILEMAP, "level1.json");
+    this.load.image(TILESET_KEYS.FIRST, "tiles_packed.png");
+    this.load.tilemapTiledJSON(TILEMAP_KEYS.FIRST, "level1.json");
   }
 
   private loadEntities() {

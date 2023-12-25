@@ -10,13 +10,15 @@ import {
   ENTITY_IMAGE_KEYS,
   ENTITY_SPRITE_KEYS,
   FONT_KEY,
-  LEVEL_KEYS,
+  TILEMAP_KEYS,
+  TILESET_KEYS,
   MUSIC_KEYS,
   SCENE_KEYS,
   SOUND_KEYS,
   ANIMATION_KEYS,
   PLUGIN_KEYS,
 } from "@/constants";
+import { Map } from "@/components/Map";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -29,6 +31,7 @@ export class MainScene extends Phaser.Scene {
 
   checkPoints: Phaser.Physics.Arcade.Group | null = null;
   checkPoint: { x: number; y: number } | null = null;
+  private map: Map | null = null;
 
   constructor() {
     super({ key: SCENE_KEYS.MAIN });
@@ -60,6 +63,27 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
+  private createMap() {
+    this.map = new Map(
+      this,
+      {
+        key: TILEMAP_KEYS.FIRST,
+        layerId: "all",
+      },
+      {
+        key: TILESET_KEYS.FIRST,
+        name: "tiles_packed",
+      },
+    );
+  }
+
+  private initAnimatedTiles(map: Phaser.Tilemaps.Tilemap) {
+    const { animatedTiles } = this.sys as typeof this.sys & {
+      [PLUGIN_KEYS.ANIMATED_TILES]: AnimatedTiles;
+    };
+    animatedTiles.init(map);
+  }
+
   create() {
     this.cameras.main.fadeIn();
 
@@ -69,31 +93,19 @@ export class MainScene extends Phaser.Scene {
       delay: 0.5,
     });
 
-    const map = this.make.tilemap({ key: LEVEL_KEYS.TILEMAP });
-    const tileset = map.addTilesetImage("tiles_packed", LEVEL_KEYS.TILESET);
-
-    if (!tileset) {
-      throw new Error("Tileset not found");
+    this.createMap();
+    if (!this.map) {
+      throw new Error("Map not found");
     }
 
-    const all = map.createLayer("all", tileset);
-
-    if (!all) {
-      throw new Error("Layer not found");
-    }
-
-    (
-      this.sys as typeof this.sys & {
-        [PLUGIN_KEYS.ANIMATED_TILES]: AnimatedTiles;
-      }
-    )[PLUGIN_KEYS.ANIMATED_TILES].init(map);
+    this.initAnimatedTiles(this.map.value);
 
     this.spikes = this.createGroup();
     this.coins = this.createGroup();
     this.jumpers = this.createGroup();
     this.checkPoints = this.createGroup();
 
-    map.getObjectLayer("coins")?.objects.forEach((coin) => {
+    this.map.value.getObjectLayer("coins")?.objects.forEach((coin) => {
       if (!hasPhysics(coin)) {
         throw new Error("Coin physics not found");
       }
@@ -115,24 +127,29 @@ export class MainScene extends Phaser.Scene {
       coinSprite.anims.play(ANIMATION_KEYS.COIN_SPIN, true);
     });
 
-    map.getObjectLayer("checkPoints")?.objects.forEach((checkPoint) => {
-      if (!hasPhysics(checkPoint)) {
-        throw new Error("CheckPoint physics not found");
-      }
+    this.map.value
+      .getObjectLayer("checkPoints")
+      ?.objects.forEach((checkPoint) => {
+        if (!hasPhysics(checkPoint)) {
+          throw new Error("CheckPoint physics not found");
+        }
 
-      const checkPointSprite: Phaser.Physics.Arcade.Sprite = this.checkPoints
-        ?.create(checkPoint.x, checkPoint.y, ENTITY_IMAGE_KEYS.CHECKPOINT)
-        .setOrigin(0, 1);
+        const checkPointSprite: Phaser.Physics.Arcade.Sprite = this.checkPoints
+          ?.create(checkPoint.x, checkPoint.y, ENTITY_IMAGE_KEYS.CHECKPOINT)
+          .setOrigin(0, 1);
 
-      if (!checkPointSprite.body) {
-        throw new Error("CheckPoint body not found");
-      }
+        if (!checkPointSprite.body) {
+          throw new Error("CheckPoint body not found");
+        }
 
-      checkPointSprite.body.setSize(checkPoint.width, checkPoint.height * 0.5);
-      checkPointSprite.body.setOffset(0, checkPoint.height * 0.5);
-    });
+        checkPointSprite.body.setSize(
+          checkPoint.width,
+          checkPoint.height * 0.5,
+        );
+        checkPointSprite.body.setOffset(0, checkPoint.height * 0.5);
+      });
 
-    map.getObjectLayer("jumpers")?.objects.forEach((jumper) => {
+    this.map.value.getObjectLayer("jumpers")?.objects.forEach((jumper) => {
       if (!hasPhysics(jumper)) {
         throw new Error("Jumper physics not found");
       }
@@ -149,7 +166,7 @@ export class MainScene extends Phaser.Scene {
       jumperSprite.body.setOffset(0, jumper.height * 0.5);
     });
 
-    map.getObjectLayer("spikes")?.objects.forEach((spike) => {
+    this.map.value.getObjectLayer("spikes")?.objects.forEach((spike) => {
       if (!hasPhysics(spike)) {
         throw new Error("Spike physics not found");
       }
@@ -182,7 +199,7 @@ export class MainScene extends Phaser.Scene {
       }
     });
 
-    const finishPoint = map.findObject(
+    const finishPoint = this.map.value.findObject(
       "finishPoint",
       (finish) => finish.name === "finish",
     );
@@ -201,13 +218,13 @@ export class MainScene extends Phaser.Scene {
     finish.setOrigin(0, 1);
     this.physics.add.existing(finish, true);
 
-    all.setCollisionByProperty({ hasCollision: true });
+    this.map.value.setCollisionByProperty({ hasCollision: true });
 
     if (!this.input.keyboard) {
       throw new Error("Keyboard not found");
     }
 
-    const spawnPoint = map.findObject(
+    const spawnPoint = this.map.value.findObject(
       "spawn",
       (spawn) => spawn.name === "spawn",
     );
@@ -298,11 +315,21 @@ export class MainScene extends Phaser.Scene {
       });
     });
 
-    this.physics.add.collider(this.player, all);
+    this.physics.add.collider(this.player, this.map.mapLayer);
 
-    this.cameras.main.setBounds(all.x, all.y, all.width, all.height);
+    this.cameras.main.setBounds(
+      this.map.mapLayer.x,
+      this.map.mapLayer.y,
+      this.map.mapLayer.width,
+      this.map.mapLayer.height,
+    );
 
-    this.physics.world.setBounds(all.x, all.y, all.width, all.height);
+    this.physics.world.setBounds(
+      this.map.mapLayer.x,
+      this.map.mapLayer.y,
+      this.map.mapLayer.width,
+      this.map.mapLayer.height,
+    );
 
     this.cameras.main.startFollow(this.player);
   }
