@@ -18,15 +18,18 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
 
     this.setOrigin(0, 0.5);
 
-    if (!this.body) {
-      throw new Error("Coin body not found");
-    }
+    this.setSize(width * 0.5, height * 0.5);
+    this.setOffset(width * 0.5 - width * 0.25, height * 0.5 - height * 0.25);
 
-    this.body.setSize(width * 0.5, height * 0.5);
-    this.body.setOffset(
-      width * 0.5 - width * 0.25,
-      height * 0.5 - height * 0.25,
-    );
+    this.anims.create({
+      key: ANIMATION_KEYS.COIN_SPIN,
+      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.COIN, {
+        start: 0,
+        end: 1,
+      }),
+      frameRate: 10,
+      repeat: -1,
+    });
 
     this.anims.play(ANIMATION_KEYS.COIN_SPIN, true);
 

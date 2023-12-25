@@ -13,12 +13,10 @@ import {
 } from "@/components";
 import { isNumber } from "@/helpers";
 import {
-  ENTITY_SPRITE_KEYS,
   TILEMAP_KEYS,
   TILESET_KEYS,
   MUSIC_KEYS,
   SCENE_KEYS,
-  ANIMATION_KEYS,
   PLUGIN_KEYS,
 } from "@/constants";
 
@@ -36,16 +34,6 @@ export class MainScene extends Phaser.Scene {
       PLUGIN_KEYS.ANIMATED_TILES,
       SCENE_KEYS.MAIN,
     );
-
-    this.anims.create({
-      key: ANIMATION_KEYS.COIN_SPIN,
-      frames: this.anims.generateFrameNumbers(ENTITY_SPRITE_KEYS.COIN, {
-        start: 0,
-        end: 1,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
   }
 
   private createMap() {
