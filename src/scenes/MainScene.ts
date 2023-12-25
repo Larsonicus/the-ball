@@ -9,19 +9,15 @@ import {
   SpikesGroup,
   JumpersGroup,
   CheckpointsGroup,
+  Finish,
 } from "@/components";
 import { isNumber } from "@/helpers";
 import {
-  DEFAULT_HEIGHT,
-  DEFAULT_WIDTH,
-  TILE_SIZE,
   ENTITY_SPRITE_KEYS,
-  FONT_KEY,
   TILEMAP_KEYS,
   TILESET_KEYS,
   MUSIC_KEYS,
   SCENE_KEYS,
-  SOUND_KEYS,
   ANIMATION_KEYS,
   PLUGIN_KEYS,
 } from "@/constants";
@@ -122,38 +118,11 @@ export class MainScene extends Phaser.Scene {
       object: this.player,
     });
 
-    const finishPoint = map.value.findObject(
-      "finishPoint",
-      (finish) => finish.name === "finish",
-    );
-
-    if (!finishPoint || !isNumber(finishPoint.x) || !isNumber(finishPoint.y)) {
-      throw new Error("Finish not found");
-    }
-
-    const finishSize = TILE_SIZE * 2;
-    const finish = this.add.rectangle(
-      finishPoint.x,
-      finishPoint.y,
-      finishSize,
-      finishSize,
-    );
-    finish.setOrigin(0, 1);
-    this.physics.add.existing(finish, true);
+    new Finish(this, map.value, {
+      object: this.player,
+    });
 
     map.value.setCollisionByProperty({ hasCollision: true });
-
-    if (!this.input.keyboard) {
-      throw new Error("Keyboard not found");
-    }
-
-    this.physics.add.overlap(this.player, finish, (_, finish) => {
-      if (!(finish instanceof Phaser.GameObjects.Rectangle)) {
-        throw new Error("Finish not found");
-      }
-
-      this.end(finish);
-    });
 
     this.physics.add.collider(this.player, map.mapLayer);
 
@@ -172,43 +141,6 @@ export class MainScene extends Phaser.Scene {
     );
 
     this.cameras.main.startFollow(this.player);
-  }
-
-  private end(
-    finish: (
-      | Phaser.Tilemaps.Tile
-      | Phaser.Types.Physics.Arcade.GameObjectWithBody
-    ) &
-      Phaser.GameObjects.Rectangle,
-  ): void {
-    finish.destroy();
-
-    this.cameras.main.fadeOut();
-    this.cameras.main.once("camerafadeoutcomplete", () => {
-      this.add
-        .rectangle(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT, 0x000000)
-        .setScale(10)
-        .setScrollFactor(0);
-
-      this.add
-        .bitmapText(
-          DEFAULT_WIDTH * 0.5,
-          DEFAULT_HEIGHT * 0.5,
-          FONT_KEY,
-          "You win!",
-          20,
-        )
-        .setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(1);
-
-      this.cameras.main.fadeIn();
-    });
-
-    this.player?.disableKeys();
-
-    this.sound.stopAll();
-    this.sound.play(SOUND_KEYS.WIN, { volume: 0.2 });
   }
 
   update(): void {

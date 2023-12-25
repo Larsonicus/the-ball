@@ -1,5 +1,10 @@
 import Phaser from "phaser";
-import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
+import {
+  ANIMATION_KEYS,
+  DEPTH,
+  ENTITY_SPRITE_KEYS,
+  SOUND_KEYS,
+} from "@/constants";
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public isDisableKeys = false;
@@ -100,7 +105,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setScale(0.1);
 
-    this.setDepth(100);
+    this.setDepth(DEPTH.PLAYER);
 
     this.setCollideWorldBounds(true);
   }
