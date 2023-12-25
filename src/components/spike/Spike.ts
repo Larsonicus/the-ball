@@ -43,7 +43,7 @@ export class Spike extends Phaser.Physics.Arcade.Image {
         return;
       }
 
-      collide.callback();
+      collide.callback?.();
     });
   }
 }

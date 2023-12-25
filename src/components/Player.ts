@@ -16,10 +16,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.initPhysics(scene);
   }
 
-  public onJumper(): void {
-    this.setVelocityY(-550);
-  }
-
   public die(callback: () => void): void {
     if (this.isDead) {
       return;

@@ -1,7 +1,14 @@
 import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
-import { Player, Score, Map, CoinsGroup, SpikesGroup } from "@/components";
+import {
+  Player,
+  Score,
+  Map,
+  CoinsGroup,
+  SpikesGroup,
+  JumpersGroup,
+} from "@/components";
 import { isNumber, hasPhysics } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
@@ -124,7 +131,10 @@ export class MainScene extends Phaser.Scene {
       callback: () => score.increment(),
     });
 
-    this.jumpers = this.createGroup();
+    new JumpersGroup(this, this.map.value, {
+      object: this.player,
+    });
+
     this.checkPoints = this.createGroup();
 
     this.map.value
@@ -148,23 +158,6 @@ export class MainScene extends Phaser.Scene {
         );
         checkPointSprite.body.setOffset(0, checkPoint.height * 0.5);
       });
-
-    this.map.value.getObjectLayer("jumpers")?.objects.forEach((jumper) => {
-      if (!hasPhysics(jumper)) {
-        throw new Error("Jumper physics not found");
-      }
-
-      const jumperSprite: Phaser.Physics.Arcade.Sprite = this.jumpers
-        ?.create(jumper.x, jumper.y, ENTITY_IMAGE_KEYS.JUMPER)
-        .setOrigin(0, 1);
-
-      if (!jumperSprite.body) {
-        throw new Error("Jumper body not found");
-      }
-
-      jumperSprite.body.setSize(jumper.width, jumper.height * 0.5);
-      jumperSprite.body.setOffset(0, jumper.height * 0.5);
-    });
 
     const finishPoint = this.map.value.findObject(
       "finishPoint",
@@ -215,29 +208,6 @@ export class MainScene extends Phaser.Scene {
       }
 
       this.end(finish);
-    });
-
-    this.physics.add.collider(this.player, this.jumpers, (_, jumper) => {
-      if (!(jumper instanceof Phaser.Physics.Arcade.Sprite)) {
-        throw new Error("Jumper not found");
-      }
-
-      if (!(jumper.body?.touching.up && this.player?.body?.touching.down)) {
-        return;
-      }
-
-      this.player?.onJumper();
-
-      jumper.setTexture(ENTITY_IMAGE_KEYS.JUMPER_ACTIVE);
-
-      this.sound.play(SOUND_KEYS.JUMPER, { volume: 0.2 });
-
-      this.time.addEvent({
-        delay: 300,
-        callback: () => {
-          jumper.setTexture(ENTITY_IMAGE_KEYS.JUMPER);
-        },
-      });
     });
 
     this.physics.add.collider(this.player, this.map.mapLayer);

@@ -31,7 +31,7 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
     this.anims.play(ANIMATION_KEYS.COIN_SPIN, true);
 
     scene.physics.add.overlap(overlap.object, this, () => {
-      overlap.callback();
+      overlap.callback?.();
 
       scene.sound.play(SOUND_KEYS.COIN, { volume: 0.5 });
       this.destroy();
