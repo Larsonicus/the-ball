@@ -32,8 +32,19 @@ export class Map {
       throw new Error("Layer not found");
     }
 
+    this.mapLayer = layer;
+
+    this.initPhysics(scene, layer);
+  }
+
+  private initPhysics(
+    scene: Phaser.Scene,
+    layer: Phaser.Tilemaps.TilemapLayer,
+  ) {
     layer.setCollisionByProperty({ hasCollision: true });
 
-    this.mapLayer = layer;
+    scene.cameras.main.setBounds(layer.x, layer.y, layer.width, layer.height);
+
+    scene.physics.world.setBounds(layer.x, layer.y, layer.width, layer.height);
   }
 }

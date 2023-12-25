@@ -92,7 +92,7 @@ export class MainScene extends Phaser.Scene {
       throw new Error("Spawn point not found");
     }
 
-    this.player = new Player(this, spawnPoint.x, spawnPoint.y);
+    this.player = new Player(this, spawnPoint.x, spawnPoint.y, map.mapLayer);
 
     const checkpoints = new CheckpointsGroup(this, map.value, {
       object: this.player,
@@ -121,26 +121,6 @@ export class MainScene extends Phaser.Scene {
     new Finish(this, map.value, {
       object: this.player,
     });
-
-    map.value.setCollisionByProperty({ hasCollision: true });
-
-    this.physics.add.collider(this.player, map.mapLayer);
-
-    this.cameras.main.setBounds(
-      map.mapLayer.x,
-      map.mapLayer.y,
-      map.mapLayer.width,
-      map.mapLayer.height,
-    );
-
-    this.physics.world.setBounds(
-      map.mapLayer.x,
-      map.mapLayer.y,
-      map.mapLayer.width,
-      map.mapLayer.height,
-    );
-
-    this.cameras.main.startFollow(this.player);
   }
 
   update(): void {

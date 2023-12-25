@@ -11,14 +11,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private isDead = false;
   private keys: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    layer: Phaser.Tilemaps.TilemapLayer,
+  ) {
     super(scene, x, y, ENTITY_SPRITE_KEYS.PLAYER);
 
     this.initKeys(scene.input);
 
     this.initAnims(scene);
 
-    this.initPhysics(scene);
+    this.initPhysics(scene, layer);
+
+    this.followCamera(scene.cameras.main);
   }
 
   public die(callback: () => void): void {
@@ -90,8 +97,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
-  private initPhysics(scene: Phaser.Scene): void {
+  private followCamera(camera: Phaser.Cameras.Scene2D.Camera): void {
+    camera.startFollow(this);
+  }
+
+  private initPhysics(
+    scene: Phaser.Scene,
+    layer: Phaser.Tilemaps.TilemapLayer,
+  ): void {
     this.setOrigin(0.5, 0.5);
+
+    scene.physics.add.collider(this, layer);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
