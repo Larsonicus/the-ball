@@ -29,12 +29,6 @@ import {
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
 
-  jumpers: Phaser.Physics.Arcade.Group | null = null;
-
-  checkPoints: Phaser.Physics.Arcade.Group | null = null;
-  checkPoint: { x: number; y: number } | null = null;
-  private map: Map | null = null;
-
   constructor() {
     super({ key: SCENE_KEYS.MAIN });
   }
@@ -59,7 +53,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   private createMap() {
-    this.map = new Map(
+    return new Map(
       this,
       {
         key: TILEMAP_KEYS.FIRST,
@@ -88,16 +82,12 @@ export class MainScene extends Phaser.Scene {
       delay: 0.5,
     });
 
-    this.createMap();
-    if (!this.map) {
-      throw new Error("Map not found");
-    }
-
-    this.initAnimatedTiles(this.map.value);
+    const map = this.createMap();
+    this.initAnimatedTiles(map.value);
 
     const score = new Score(this, 5, 6);
 
-    const spawnPoint = this.map.value.findObject(
+    const spawnPoint = map.value.findObject(
       "spawn",
       (spawn) => spawn.name === "spawn",
     );
@@ -108,11 +98,11 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
-    const checkpoints = new CheckpointsGroup(this, this.map.value, {
+    const checkpoints = new CheckpointsGroup(this, map.value, {
       object: this.player,
     });
 
-    new SpikesGroup(this, this.map.value, {
+    new SpikesGroup(this, map.value, {
       object: this.player,
       callback: () =>
         this.player?.die(() => {
@@ -123,16 +113,16 @@ export class MainScene extends Phaser.Scene {
         }),
     });
 
-    new CoinsGroup(this, this.map.value, {
+    new CoinsGroup(this, map.value, {
       object: this.player,
       callback: () => score.increment(),
     });
 
-    new JumpersGroup(this, this.map.value, {
+    new JumpersGroup(this, map.value, {
       object: this.player,
     });
 
-    const finishPoint = this.map.value.findObject(
+    const finishPoint = map.value.findObject(
       "finishPoint",
       (finish) => finish.name === "finish",
     );
@@ -151,7 +141,7 @@ export class MainScene extends Phaser.Scene {
     finish.setOrigin(0, 1);
     this.physics.add.existing(finish, true);
 
-    this.map.value.setCollisionByProperty({ hasCollision: true });
+    map.value.setCollisionByProperty({ hasCollision: true });
 
     if (!this.input.keyboard) {
       throw new Error("Keyboard not found");
@@ -165,20 +155,20 @@ export class MainScene extends Phaser.Scene {
       this.end(finish);
     });
 
-    this.physics.add.collider(this.player, this.map.mapLayer);
+    this.physics.add.collider(this.player, map.mapLayer);
 
     this.cameras.main.setBounds(
-      this.map.mapLayer.x,
-      this.map.mapLayer.y,
-      this.map.mapLayer.width,
-      this.map.mapLayer.height,
+      map.mapLayer.x,
+      map.mapLayer.y,
+      map.mapLayer.width,
+      map.mapLayer.height,
     );
 
     this.physics.world.setBounds(
-      this.map.mapLayer.x,
-      this.map.mapLayer.y,
-      this.map.mapLayer.width,
-      this.map.mapLayer.height,
+      map.mapLayer.x,
+      map.mapLayer.y,
+      map.mapLayer.width,
+      map.mapLayer.height,
     );
 
     this.cameras.main.startFollow(this.player);
