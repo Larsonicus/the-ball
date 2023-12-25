@@ -96,7 +96,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
 
     if (!this.body) {
-      throw new Error("Body not found");
+      throw new Error("Player body not found");
     }
 
     this.body.setOffset(320 / 4 - 7, 320 / 2 - 14);

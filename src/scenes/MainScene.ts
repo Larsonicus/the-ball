@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
-import { Player, Score } from "@/components";
+import { Player, Score, Map, CoinsGroup } from "@/components";
 import { isNumber, hasPhysics } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
@@ -18,7 +18,6 @@ import {
   ANIMATION_KEYS,
   PLUGIN_KEYS,
 } from "@/constants";
-import { Map } from "@/components/Map";
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
@@ -100,32 +99,28 @@ export class MainScene extends Phaser.Scene {
 
     this.initAnimatedTiles(this.map.value);
 
+    const score = new Score(this, 5, 6);
+
+    const spawnPoint = this.map.value.findObject(
+      "spawn",
+      (spawn) => spawn.name === "spawn",
+    );
+
+    if (!spawnPoint || !isNumber(spawnPoint.x) || !isNumber(spawnPoint.y)) {
+      throw new Error("Spawn point not found");
+    }
+
+    this.player = new Player(this, spawnPoint.x, spawnPoint.y);
+
     this.spikes = this.createGroup();
-    this.coins = this.createGroup();
+
+    this.coins = new CoinsGroup(this, this.map.value, {
+      object: this.player,
+      callback: () => score.increment(),
+    });
+
     this.jumpers = this.createGroup();
     this.checkPoints = this.createGroup();
-
-    this.map.value.getObjectLayer("coins")?.objects.forEach((coin) => {
-      if (!hasPhysics(coin)) {
-        throw new Error("Coin physics not found");
-      }
-
-      const coinSprite: Phaser.Physics.Arcade.Sprite = this.coins
-        ?.create(coin.x, coin.y - coin.height / 2, ENTITY_SPRITE_KEYS.COIN)
-        .setOrigin(0, 0.5);
-
-      if (!coinSprite.body) {
-        throw new Error("Coin body not found");
-      }
-
-      coinSprite.body.setSize(coin.width * 0.5, coin.height * 0.5);
-      coinSprite.body.setOffset(
-        coin.width * 0.5 - coin.width * 0.25,
-        coin.height * 0.5 - coin.height * 0.25,
-      );
-
-      coinSprite.anims.play(ANIMATION_KEYS.COIN_SPIN, true);
-    });
 
     this.map.value
       .getObjectLayer("checkPoints")
@@ -223,26 +218,6 @@ export class MainScene extends Phaser.Scene {
     if (!this.input.keyboard) {
       throw new Error("Keyboard not found");
     }
-
-    const spawnPoint = this.map.value.findObject(
-      "spawn",
-      (spawn) => spawn.name === "spawn",
-    );
-
-    if (!spawnPoint || !isNumber(spawnPoint.x) || !isNumber(spawnPoint.y)) {
-      throw new Error("Spawn point not found");
-    }
-
-    this.player = new Player(this, spawnPoint.x, spawnPoint.y);
-
-    const score = new Score(this, 5, 6);
-
-    this.physics.add.overlap(this.player, this.coins, (_, coin) => {
-      score.increment();
-
-      this.sound.play(SOUND_KEYS.COIN, { volume: 0.5 });
-      coin.destroy();
-    });
 
     this.physics.add.overlap(this.player, this.checkPoints, (_, checkPoint) => {
       if (!(checkPoint instanceof Phaser.Physics.Arcade.Sprite)) {
