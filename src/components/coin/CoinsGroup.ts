@@ -1,6 +1,6 @@
 import { Player } from "@/components";
 import { hasPhysics } from "@/helpers";
-import { IOverlap } from "@/types";
+import { ITouch } from "@/types";
 
 import { Coin } from "./Coin";
 
@@ -8,7 +8,7 @@ export class CoinsGroup extends Phaser.Physics.Arcade.Group {
   constructor(
     scene: Phaser.Scene,
     map: Phaser.Tilemaps.Tilemap,
-    overlap: IOverlap<Player>,
+    overlap: ITouch<Player>,
   ) {
     super(scene.physics.world, scene, {
       allowGravity: false,

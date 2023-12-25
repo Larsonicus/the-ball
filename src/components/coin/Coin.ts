@@ -1,6 +1,6 @@
 import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
 import { Player } from "@/components";
-import { IOverlap } from "@/types";
+import { ITouch } from "@/types";
 
 export class Coin extends Phaser.Physics.Arcade.Sprite {
   constructor(
@@ -9,7 +9,7 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
     y: number,
     width: number,
     height: number,
-    overlap: IOverlap<Player>,
+    overlap: ITouch<Player>,
   ) {
     super(scene, x, y, ENTITY_SPRITE_KEYS.COIN);
 

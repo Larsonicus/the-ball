@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import AnimatedTiles from "phaser-animated-tiles-phaser3.5/dist/AnimatedTiles.min.js";
 
-import { Player, Score, Map, CoinsGroup } from "@/components";
+import { Player, Score, Map, CoinsGroup, SpikesGroup } from "@/components";
 import { isNumber, hasPhysics } from "@/helpers";
 import {
   DEFAULT_HEIGHT,
@@ -21,10 +21,6 @@ import {
 
 export class MainScene extends Phaser.Scene {
   player: Player | null = null;
-
-  spikes: Phaser.Physics.Arcade.Group | null = null;
-
-  coins: Phaser.Physics.Arcade.Group | null = null;
 
   jumpers: Phaser.Physics.Arcade.Group | null = null;
 
@@ -112,9 +108,18 @@ export class MainScene extends Phaser.Scene {
 
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
-    this.spikes = this.createGroup();
+    new SpikesGroup(this, this.map.value, {
+      object: this.player,
+      callback: () =>
+        this.player?.die(() => {
+          this.player?.setPosition(
+            this.checkPoint?.x ?? spawnPoint.x,
+            this.checkPoint?.y ?? spawnPoint.y,
+          );
+        }),
+    });
 
-    this.coins = new CoinsGroup(this, this.map.value, {
+    new CoinsGroup(this, this.map.value, {
       object: this.player,
       callback: () => score.increment(),
     });
@@ -161,39 +166,6 @@ export class MainScene extends Phaser.Scene {
       jumperSprite.body.setOffset(0, jumper.height * 0.5);
     });
 
-    this.map.value.getObjectLayer("spikes")?.objects.forEach((spike) => {
-      if (!hasPhysics(spike)) {
-        throw new Error("Spike physics not found");
-      }
-
-      if (!this.spikes) {
-        throw new Error("Spikes group not created");
-      }
-
-      const spikeSprite: Phaser.Physics.Arcade.Sprite = this.spikes
-        .create(
-          spike.x,
-          spike.rotation === 180
-            ? spike.y + spike.height
-            : spike.y - spike.height,
-          ENTITY_IMAGE_KEYS.SPIKE,
-        )
-        .setOrigin(0)
-        .setAngle(spike.rotation);
-
-      if (!spikeSprite.body) {
-        throw new Error("Spike body not found");
-      }
-
-      spikeSprite.body
-        .setSize(spike.width, spike.height - spike.height * 0.5)
-        .setOffset(0, spike.height * 0.5);
-
-      if (spike.rotation === 180) {
-        spikeSprite.body.setOffset(-spike.width, -spike.height);
-      }
-    });
-
     const finishPoint = this.map.value.findObject(
       "finishPoint",
       (finish) => finish.name === "finish",
@@ -235,28 +207,6 @@ export class MainScene extends Phaser.Scene {
       checkPoint.setData("isPressed", true);
 
       this.checkPoint = { x: checkPoint.x, y: checkPoint.y };
-    });
-
-    this.physics.add.collider(this.player, this.spikes, (_, spike) => {
-      if (!(spike instanceof Phaser.Physics.Arcade.Sprite)) {
-        throw new Error("Spike not found");
-      }
-
-      if (
-        !(
-          (this.player?.body?.touching.down && spike.body?.touching.up) ||
-          (this.player?.body?.touching.up && spike.body?.touching.down)
-        )
-      ) {
-        return;
-      }
-
-      this.player?.die(() => {
-        this.player?.setPosition(
-          this.checkPoint?.x ?? spawnPoint.x,
-          this.checkPoint?.y ?? spawnPoint.y,
-        );
-      });
     });
 
     this.physics.add.overlap(this.player, finish, (_, finish) => {
