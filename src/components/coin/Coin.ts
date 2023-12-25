@@ -1,16 +1,21 @@
 import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
 import { Player } from "@/components";
 import { ITouch } from "@/types";
+import { hasPhysics } from "@/helpers";
 
 export class Coin extends Phaser.Physics.Arcade.Sprite {
   constructor(
     scene: Phaser.Scene,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+    tile: Phaser.Types.Tilemaps.TiledObject,
     overlap: ITouch<Player>,
   ) {
+    if (!hasPhysics(tile)) {
+      throw new Error("Coin physics not found");
+    }
+
+    const x = tile.x;
+    const y = tile.y - tile.height / 2;
+
     super(scene, x, y, ENTITY_SPRITE_KEYS.COIN);
 
     scene.add.existing(this);
@@ -18,8 +23,11 @@ export class Coin extends Phaser.Physics.Arcade.Sprite {
 
     this.setOrigin(0, 0.5);
 
-    this.setSize(width * 0.5, height * 0.5);
-    this.setOffset(width * 0.5 - width * 0.25, height * 0.5 - height * 0.25);
+    this.setSize(tile.width * 0.5, tile.height * 0.5);
+    this.setOffset(
+      tile.width * 0.5 - tile.width * 0.25,
+      tile.height * 0.5 - tile.height * 0.25,
+    );
 
     this.anims.create({
       key: ANIMATION_KEYS.COIN_SPIN,

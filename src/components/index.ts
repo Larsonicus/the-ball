@@ -6,3 +6,4 @@ export * from "./Map";
 export * from "./Player";
 export * from "./Score";
 export * from "./Finish";
+export * from "./BaseGroup";
