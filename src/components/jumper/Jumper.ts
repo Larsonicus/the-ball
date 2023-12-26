@@ -1,5 +1,5 @@
 import { ITouch } from "@/types";
-import { Player } from "../Player";
+import { Player } from "@/components";
 import { hasPhysics } from "@/helpers";
 import { ENTITY_IMAGE_KEYS, SOUND_KEYS } from "@/constants";
 
