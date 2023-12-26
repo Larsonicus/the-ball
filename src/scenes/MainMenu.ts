@@ -8,11 +8,7 @@ import {
   SCENE_KEYS,
   UI_KEYS,
 } from "@/constants";
-
-type Element =
-  | Phaser.GameObjects.Image
-  | Phaser.GameObjects.Text
-  | Phaser.GameObjects.BitmapText;
+import { UIElement } from "@/types";
 
 export class MainMenu extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Image[] = [];
@@ -72,8 +68,8 @@ export class MainMenu extends Phaser.Scene {
   }
 
   private changeElementsVisibility(
-    visible: Array<Element>,
-    hidden: Array<Element>,
+    visible: Array<UIElement>,
+    hidden: Array<UIElement>,
   ) {
     for (const element of visible) {
       element.setVisible(true);
@@ -159,8 +155,8 @@ export class MainMenu extends Phaser.Scene {
     button: Phaser.GameObjects.Image,
     text: Phaser.GameObjects.BitmapText,
     elementVisibility: {
-      visible: Array<Element>;
-      hidden: Array<Element>;
+      visible: Array<UIElement>;
+      hidden: Array<UIElement>;
     },
   ) {
     button.on("pointerover", () => {
@@ -251,8 +247,8 @@ export class MainMenu extends Phaser.Scene {
   private addCloseOptionsButtonEventHandlers(
     button: Phaser.GameObjects.Image,
     elementVisibility: {
-      visible: Array<Element>;
-      hidden: Array<Element>;
+      visible: Array<UIElement>;
+      hidden: Array<UIElement>;
     },
   ) {
     button.on("pointerover", () => {
