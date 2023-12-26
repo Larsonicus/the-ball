@@ -1,2 +1,2 @@
-export * from "./IOverlap";
+export * from "./ITouch";
 export * from "./UIElement";
