@@ -9,10 +9,6 @@ export class Score extends Phaser.GameObjects.Text {
     return this._value;
   }
 
-  private set value(value: number) {
-    this._value = value;
-  }
-
   private readonly _scoreText: Phaser.GameObjects.BitmapText;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {

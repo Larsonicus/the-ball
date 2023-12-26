@@ -21,7 +21,7 @@ import {
 } from "@/constants";
 
 export class MainScene extends Phaser.Scene {
-  player: Player | null = null;
+  private player: Player | null = null;
 
   constructor() {
     super({ key: SCENE_KEYS.MAIN });
@@ -33,20 +33,6 @@ export class MainScene extends Phaser.Scene {
       AnimatedTiles,
       PLUGIN_KEYS.ANIMATED_TILES,
       SCENE_KEYS.MAIN,
-    );
-  }
-
-  private createMap() {
-    return new Map(
-      this,
-      {
-        key: TILEMAP_KEYS.FIRST,
-        layerId: "all",
-      },
-      {
-        key: TILESET_KEYS.FIRST,
-        name: "tiles_packed",
-      },
     );
   }
 
@@ -66,7 +52,17 @@ export class MainScene extends Phaser.Scene {
       delay: 0.5,
     });
 
-    const map = this.createMap();
+    const map = new Map(
+      this,
+      {
+        key: TILEMAP_KEYS.FIRST,
+        layerId: "all",
+      },
+      {
+        key: TILESET_KEYS.FIRST,
+        name: "tiles_packed",
+      },
+    );
     this.initAnimatedTiles(map.value);
 
     const score = new Score(this, 5, 6);
