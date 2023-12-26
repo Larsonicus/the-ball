@@ -1,4 +1,4 @@
-# HUGE BALL RUNNER
+# THE BALL
 
 Игра в жанре платформер, созданная с помощью фреймворка [Phaser.js](https://phaser.io/)
 

@@ -183,7 +183,7 @@ export class MainMenu extends Phaser.Scene {
 
   private addTitle() {
     const title = this.add
-      .bitmapText(DEFAULT_WIDTH * 0.5, 40, FONT_KEY, "Huge Ball\nRunner", 24, 1)
+      .bitmapText(DEFAULT_WIDTH * 0.5, 40, FONT_KEY, "The Ball", 24, 1)
       .setOrigin(0.5)
       .setDepth(2);
 
