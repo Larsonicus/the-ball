@@ -1,3 +1,5 @@
+import { hasPhysics } from "@/helpers";
+
 export class BaseGroup<
   T extends Phaser.Physics.Arcade.Image | Phaser.Physics.Arcade.Sprite,
 > extends Phaser.Physics.Arcade.Group {
@@ -5,7 +7,7 @@ export class BaseGroup<
     scene: Phaser.Scene,
     map: Phaser.Tilemaps.Tilemap,
     layerName: string,
-    createFromTile: (tile: Phaser.Types.Tilemaps.TiledObject) => T,
+    createFromTile: (tile: Required<Phaser.Types.Tilemaps.TiledObject>) => T,
   ) {
     super(scene.physics.world, scene, {
       allowGravity: false,
@@ -19,6 +21,10 @@ export class BaseGroup<
     }
 
     tiles.forEach((tile) => {
+      if (!hasPhysics(tile)) {
+        throw new Error(`[${layerName}]: Tile must have physics properties`);
+      }
+
       const object = createFromTile(tile);
       this.add(object);
     });

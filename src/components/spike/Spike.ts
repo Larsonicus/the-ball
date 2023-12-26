@@ -1,18 +1,13 @@
 import { ENTITY_IMAGE_KEYS } from "@/constants";
 import { Player } from "@/components";
 import { ITouch } from "@/types";
-import { hasPhysics } from "@/helpers";
 
 export class Spike extends Phaser.Physics.Arcade.Image {
   constructor(
     scene: Phaser.Scene,
-    tile: Phaser.Types.Tilemaps.TiledObject,
+    tile: Required<Phaser.Types.Tilemaps.TiledObject>,
     collide: ITouch<Player>,
   ) {
-    if (!hasPhysics(tile)) {
-      throw new Error("Spike physics not found");
-    }
-
     const x = tile.x;
     const y =
       tile.rotation === 180 ? tile.y + tile.height : tile.y - tile.height;

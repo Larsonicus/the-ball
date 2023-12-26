@@ -1,18 +1,13 @@
 import { ANIMATION_KEYS, ENTITY_SPRITE_KEYS, SOUND_KEYS } from "@/constants";
 import { Player } from "@/components";
 import { ITouch } from "@/types";
-import { hasPhysics } from "@/helpers";
 
 export class Coin extends Phaser.Physics.Arcade.Sprite {
   constructor(
     scene: Phaser.Scene,
-    tile: Phaser.Types.Tilemaps.TiledObject,
+    tile: Required<Phaser.Types.Tilemaps.TiledObject>,
     overlap: ITouch<Player>,
   ) {
-    if (!hasPhysics(tile)) {
-      throw new Error("Coin physics not found");
-    }
-
     const x = tile.x;
     const y = tile.y - tile.height / 2;
 
